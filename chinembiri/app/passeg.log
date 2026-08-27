@@ -1,0 +1,794 @@
+App 1208904 output: Auto-published scheduled notices at 2026-06-08T08:23:12.850Z
+App 1211278 output: file:///home/onlinezi/chinembiri.onlinezim.co.zw/e-learning-portal/server.js:2887
+App 1211278 output:             <pre>${err.message}</pre>);
+App 1211278 output: SyntaxError: missing ) after argument list
+App 1211278 output:     at compileSourceTextModule (node:internal/modules/esm/utils:346:16)
+App 1211278 output:     at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:382:18)
+App 1211278 output:     at loadESMFromCJS (node:internal/modules/cjs/loader:1363:24)
+App 1211278 output:     at Module._compile (node:internal/modules/cjs/loader:1503:5)
+App 1211278 output:     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+App 1211278 output:     at Module.load (node:internal/modules/cjs/loader:1266:32)
+App 1211278 output:     at Module._load (node:internal/modules/cjs/loader:1091:12)
+App 1211278 output:     at Module.require (node:internal/modules/cjs/loader:1289:19)
+App 1211278 output:     at Module.require (/usr/share/passenger/helper-scripts/node-loader.js:80:25)
+App 1211278 output:     at require (node:internal/modules/helpers:182:18)
+App 1211278 output: Node.js v20.20.2
+App 1211421 output: file:///home/onlinezi/chinembiri.onlinezim.co.zw/e-learning-portal/server.js:2887
+App 1211421 output:             <pre>${err.message}</pre>);
+App 1211421 output: SyntaxError: missing ) after argument list
+App 1211421 output:     at compileSourceTextModule (node:internal/modules/esm/utils:346:16)
+App 1211421 output:     at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:382:18)
+App 1211421 output:     at loadESMFromCJS (node:internal/modules/cjs/loader:1363:24)
+App 1211421 output:     at Module._compile (node:internal/modules/cjs/loader:1503:5)
+App 1211421 output:     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+App 1211421 output:     at Module.load (node:internal/modules/cjs/loader:1266:32)
+App 1211421 output:     at Module._load (node:internal/modules/cjs/loader:1091:12)
+App 1211421 output:     at Module.require (node:internal/modules/cjs/loader:1289:19)
+App 1211421 output:     at Module.require (/usr/share/passenger/helper-scripts/node-loader.js:80:25)
+App 1211421 output:     at require (node:internal/modules/helpers:182:18)
+App 1211421 output: Node.js v20.20.2
+App 1214750 output: Warning: connect.session() MemoryStore is not
+App 1214750 output: designed for a production environment, as it will leak
+App 1214750 output: memory, and will not scale past a single process.
+App 1214750 output: Server running on port 3000
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 2593,
+App 1214750 output:   username: 'TNAUMI',
+App 1214750 output:   password: '$2b$10$ljABDCatVxAtITbHuNlIUOD1ht9KoNzGC5Ks/n/d0p7OE2Ld3wELC',
+App 1214750 output:   role: 'teacher',
+App 1214750 output:   first_name: 'Tafadzwa',
+App 1214750 output:   last_name: 'Musapu',
+App 1214750 output:   unique_id: 'TNAUMI',
+App 1214750 output:   created_at: '2026-05-29T08:03:08.000Z'
+App 1214750 output: }
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 2593,
+App 1214750 output:   username: 'TNAUMI',
+App 1214750 output:   password: '$2b$10$ljABDCatVxAtITbHuNlIUOD1ht9KoNzGC5Ks/n/d0p7OE2Ld3wELC',
+App 1214750 output:   role: 'teacher',
+App 1214750 output:   first_name: 'Tafadzwa',
+App 1214750 output:   last_name: 'Musapu',
+App 1214750 output:   unique_id: 'TNAUMI',
+App 1214750 output:   created_at: '2026-05-29T08:03:08.000Z'
+App 1214750 output: }
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 2593,
+App 1214750 output:   username: 'TNAUMI',
+App 1214750 output:   password: '$2b$10$ljABDCatVxAtITbHuNlIUOD1ht9KoNzGC5Ks/n/d0p7OE2Ld3wELC',
+App 1214750 output:   role: 'teacher',
+App 1214750 output:   first_name: 'Tafadzwa',
+App 1214750 output:   last_name: 'Musapu',
+App 1214750 output:   unique_id: 'TNAUMI',
+App 1214750 output:   created_at: '2026-05-29T08:03:08.000Z'
+App 1214750 output: }
+App 1214750 output: =================================
+App 1214750 output: TEACHER CLASS PAGE OPENED
+App 1214750 output: User: {
+App 1214750 output:   id: 2593,
+App 1214750 output:   username: 'TNAUMI',
+App 1214750 output:   password: '$2b$10$ljABDCatVxAtITbHuNlIUOD1ht9KoNzGC5Ks/n/d0p7OE2Ld3wELC',
+App 1214750 output:   role: 'teacher',
+App 1214750 output:   first_name: 'Tafadzwa',
+App 1214750 output:   last_name: 'Musapu',
+App 1214750 output:   unique_id: 'TNAUMI',
+App 1214750 output:   created_at: '2026-05-29T08:03:08.000Z'
+App 1214750 output: }
+App 1214750 output: Class ID: 50
+App 1214750 output: =================================
+App 1214750 output: Students found: 48
+App 1214750 output: First student:
+App 1214750 output: {
+App 1214750 output:   id: 2088,
+App 1214750 output:   form_level: 'GRADE 1',
+App 1214750 output:   status: 'active',
+App 1214750 output:   first_name: 'PRAISE',
+App 1214750 output:   last_name: 'ANANDA',
+App 1214750 output:   unique_id: 'S9561F',
+App 1214750 output:   class_name: 'GRADE 1B',
+App 1214750 output:   total_invoiced: '90.00',
+App 1214750 output:   total_paid: '0.00',
+App 1214750 output:   sponsor_type: null,
+App 1214750 output:   approved_amount: '0.00',
+App 1214750 output:   sponsor_paid_amount: '0.00',
+App 1214750 output:   sponsor_balance: '0.00',
+App 1214750 output:   sponsor_status: null,
+App 1214750 output:   balance: '90.00'
+App 1214750 output: }
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:26:20.091Z
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 3,
+App 1214750 output:   username: 'Chinembiri',
+App 1214750 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 1214750 output:   role: 'admin',
+App 1214750 output:   first_name: 'Chinembiri',
+App 1214750 output:   last_name: null,
+App 1214750 output:   unique_id: 'ADMIN001',
+App 1214750 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 1214750 output: }
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 3,
+App 1214750 output:   username: 'Chinembiri',
+App 1214750 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 1214750 output:   role: 'admin',
+App 1214750 output:   first_name: 'Chinembiri',
+App 1214750 output:   last_name: null,
+App 1214750 output:   unique_id: 'ADMIN001',
+App 1214750 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 1214750 output: }
+App 1214750 output: ROLE CHECK
+App 1214750 output: Session User: {
+App 1214750 output:   id: 3,
+App 1214750 output:   username: 'Chinembiri',
+App 1214750 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 1214750 output:   role: 'admin',
+App 1214750 output:   first_name: 'Chinembiri',
+App 1214750 output:   last_name: null,
+App 1214750 output:   unique_id: 'ADMIN001',
+App 1214750 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 1214750 output: }
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:27:20.096Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:28:20.125Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:29:20.156Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:30:20.191Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:31:20.215Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:32:20.243Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:33:20.273Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:34:20.283Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:35:20.313Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:36:20.343Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:37:20.373Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:38:20.403Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:39:20.433Z
+App 1214750 output: Auto-published scheduled notices at 2026-06-08T08:40:20.463Z
+App 1419919 output: Warning: connect.session() MemoryStore is not
+App 1419919 output: designed for a production environment, as it will leak
+App 1419919 output: memory, and will not scale past a single process.
+App 1419919 output: Server running on port 3000
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T09:57:03.326Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T09:58:03.350Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T09:59:03.379Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:00:03.413Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:01:03.441Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:02:03.471Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:03:03.501Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:04:03.531Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:05:03.590Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:06:03.591Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:07:03.604Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:08:03.634Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:09:03.664Z
+App 1419919 output: Auto-published scheduled notices at 2026-06-08T10:10:03.702Z
+App 1451240 output: Warning: connect.session() MemoryStore is not
+App 1451240 output: designed for a production environment, as it will leak
+App 1451240 output: memory, and will not scale past a single process.
+App 1451240 output: Server running on port 3000
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:12:22.246Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:13:22.251Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:14:22.264Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:15:22.294Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:16:22.324Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:17:22.354Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:18:22.384Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:19:22.415Z
+App 1451240 output: Auto-published scheduled notices at 2026-06-08T10:20:22.451Z
+App 2100568 output: Warning: connect.session() MemoryStore is not
+App 2100568 output: designed for a production environment, as it will leak
+App 2100568 output: memory, and will not scale past a single process.
+App 2100568 output: Server running on port 3000
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:08:54.457Z
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:09:54.478Z
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:10:54.505Z
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:11:54.536Z
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:12:54.565Z
+App 2100568 output: Auto-published scheduled notices at 2026-06-08T15:13:54.595Z
+App 2113837 output: Warning: connect.session() MemoryStore is not
+App 2113837 output: designed for a production environment, as it will leak
+App 2113837 output: memory, and will not scale past a single process.
+App 2113837 output: Server running on port 3000
+App 2146095 output: Warning: connect.session() MemoryStore is not
+App 2146095 output: designed for a production environment, as it will leak
+App 2146095 output: memory, and will not scale past a single process.
+App 2146095 output: Server running on port 3000
+App 2146095 output: Auto-published scheduled notices at 2026-06-08T15:34:39.269Z
+App 2146095 output: Auto-published scheduled notices at 2026-06-08T15:35:39.292Z
+App 2146095 output: Auto-published scheduled notices at 2026-06-08T15:36:39.325Z
+App 2146095 output: Auto-published scheduled notices at 2026-06-08T15:37:39.340Z
+App 2146095 output: Auto-published scheduled notices at 2026-06-08T15:38:39.369Z
+App 2206061 output: Warning: connect.session() MemoryStore is not
+App 2206061 output: designed for a production environment, as it will leak
+App 2206061 output: memory, and will not scale past a single process.
+App 2206061 output: Server running on port 3000
+App 2206061 output: Auto-published scheduled notices at 2026-06-08T16:01:18.756Z
+App 2206061 output: Auto-published scheduled notices at 2026-06-08T16:02:18.755Z
+App 2206061 output: Auto-published scheduled notices at 2026-06-08T16:03:18.785Z
+App 2206061 output: Auto-published scheduled notices at 2026-06-08T16:04:18.815Z
+App 2206061 output: Auto-published scheduled notices at 2026-06-08T16:05:18.845Z
+App 2259014 output: Warning: connect.session() MemoryStore is not
+App 2259014 output: designed for a production environment, as it will leak
+App 2259014 output: memory, and will not scale past a single process.
+App 2259014 output: Server running on port 3000
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:37:06.966Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:38:06.981Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:39:07.013Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:40:07.050Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:41:07.071Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:42:07.109Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:43:07.132Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:44:07.164Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:45:07.520Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:46:07.292Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:47:07.322Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:48:07.356Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:49:07.383Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:50:07.412Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:51:07.442Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:52:07.472Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:53:07.502Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:54:07.532Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:55:07.562Z
+App 2259014 output: Auto-published scheduled notices at 2026-06-08T16:56:07.592Z
+App 2373347 output: Warning: connect.session() MemoryStore is not
+App 2373347 output: designed for a production environment, as it will leak
+App 2373347 output: memory, and will not scale past a single process.
+App 2373347 output: Server running on port 3000
+App 2699004 output: Warning: connect.session() MemoryStore is not
+App 2699004 output: designed for a production environment, as it will leak
+App 2699004 output: memory, and will not scale past a single process.
+App 2699004 output: Server running on port 3000
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:23:37.565Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:24:37.588Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:25:37.617Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:26:37.648Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:27:37.679Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:28:37.707Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:29:37.737Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:30:37.767Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:31:37.801Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:32:37.827Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:33:37.856Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:34:37.864Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:35:37.894Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:36:37.924Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:37:37.957Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:38:37.983Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:39:37.985Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:40:38.014Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:41:38.044Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:42:38.075Z
+App 2699004 output: Auto-published scheduled notices at 2026-06-08T20:43:38.104Z
+App 2730438 output: Warning: connect.session() MemoryStore is not
+App 2730438 output: designed for a production environment, as it will leak
+App 2730438 output: memory, and will not scale past a single process.
+App 2730438 output: Server running on port 3000
+App 2894338 output: Warning: connect.session() MemoryStore is not
+App 2894338 output: designed for a production environment, as it will leak
+App 2894338 output: memory, and will not scale past a single process.
+App 2894338 output: Server running on port 3000
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:09:04.565Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:10:04.590Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:11:04.619Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:12:04.649Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:13:04.666Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:14:04.695Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:15:04.725Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:16:04.755Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:17:04.786Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:18:04.815Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:19:04.845Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:20:04.875Z
+App 2894338 output: Auto-published scheduled notices at 2026-06-08T22:21:04.905Z
+App 2934199 output: Warning: connect.session() MemoryStore is not
+App 2934199 output: designed for a production environment, as it will leak
+App 2934199 output: memory, and will not scale past a single process.
+App 2934199 output: Server running on port 3000
+App 3165491 output: Warning: connect.session() MemoryStore is not
+App 3165491 output: designed for a production environment, as it will leak
+App 3165491 output: memory, and will not scale past a single process.
+App 3165491 output: Server running on port 3000
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:27:24.086Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:28:24.098Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:29:24.130Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:30:24.157Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:31:24.187Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:32:24.209Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:33:24.238Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:34:24.269Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:35:24.298Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:36:24.328Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:37:24.358Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:38:24.386Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:39:24.413Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:40:24.443Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:41:24.472Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:42:24.502Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:43:24.532Z
+App 3165491 output: Auto-published scheduled notices at 2026-06-09T01:44:24.562Z
+App 3328971 output: Warning: connect.session() MemoryStore is not
+App 3328971 output: designed for a production environment, as it will leak
+App 3328971 output: memory, and will not scale past a single process.
+App 3328971 output: Server running on port 3000
+App 3708289 output: Warning: connect.session() MemoryStore is not
+App 3708289 output: designed for a production environment, as it will leak
+App 3708289 output: memory, and will not scale past a single process.
+App 3708289 output: Server running on port 3000
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:03:55.651Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:04:55.672Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:05:55.703Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:06:55.732Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:07:55.765Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:08:55.792Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:09:55.796Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:10:55.825Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:11:55.856Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:12:55.885Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:13:55.915Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:14:55.943Z
+App 3708289 output: Auto-published scheduled notices at 2026-06-09T05:15:55.973Z
+App 3812623 output: Warning: connect.session() MemoryStore is not
+App 3812623 output: designed for a production environment, as it will leak
+App 3812623 output: memory, and will not scale past a single process.
+App 3812623 output: Server running on port 3000
+App 3857989 output: Warning: connect.session() MemoryStore is not
+App 3857989 output: designed for a production environment, as it will leak
+App 3857989 output: memory, and will not scale past a single process.
+App 3857989 output: Server running on port 3000
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:27:21.268Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:28:21.242Z
+App 3857989 output: ROLE CHECK
+App 3857989 output: Session User: {
+App 3857989 output:   id: 3,
+App 3857989 output:   username: 'Chinembiri',
+App 3857989 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 3857989 output:   role: 'admin',
+App 3857989 output:   first_name: 'Chinembiri',
+App 3857989 output:   last_name: null,
+App 3857989 output:   unique_id: 'ADMIN001',
+App 3857989 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 3857989 output: }
+App 3857989 output: ROLE CHECK
+App 3857989 output: Session User: {
+App 3857989 output:   id: 3,
+App 3857989 output:   username: 'Chinembiri',
+App 3857989 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 3857989 output:   role: 'admin',
+App 3857989 output:   first_name: 'Chinembiri',
+App 3857989 output:   last_name: null,
+App 3857989 output:   unique_id: 'ADMIN001',
+App 3857989 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 3857989 output: }
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:29:21.271Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:30:21.302Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:31:21.331Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:32:21.374Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:33:21.393Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:34:21.423Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:35:21.451Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:36:21.481Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:37:21.511Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:38:21.541Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:39:21.587Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:40:21.601Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:41:21.631Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:42:21.661Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:43:21.693Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:44:21.693Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:45:21.735Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:46:21.749Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:47:21.778Z
+App 3857989 output: Auto-published scheduled notices at 2026-06-09T06:48:21.808Z
+App 3940918 output: Warning: connect.session() MemoryStore is not
+App 3940918 output: designed for a production environment, as it will leak
+App 3940918 output: memory, and will not scale past a single process.
+App 3940918 output: Server running on port 3000
+App 3940918 output: ROLE CHECK
+App 3940918 output: Session User: undefined
+App 3940918 output: No session user
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T06:57:20.454Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T06:58:20.468Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T06:59:20.497Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:00:20.527Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:01:20.557Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:02:20.601Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:03:20.620Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:04:20.650Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:05:20.681Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:06:20.709Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:07:20.738Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:08:20.771Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:09:20.773Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:10:20.803Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:11:20.833Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:12:20.863Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:13:20.894Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:14:20.923Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:15:20.954Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:16:20.956Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:17:20.986Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:18:21.016Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:19:21.046Z
+App 3940918 output: Auto-published scheduled notices at 2026-06-09T07:20:21.077Z
+App 3994417 output: Warning: connect.session() MemoryStore is not
+App 3994417 output: designed for a production environment, as it will leak
+App 3994417 output: memory, and will not scale past a single process.
+App 3994417 output: Server running on port 3000
+App 128025 output: Warning: connect.session() MemoryStore is not
+App 128025 output: designed for a production environment, as it will leak
+App 128025 output: memory, and will not scale past a single process.
+App 128025 output: Server running on port 3000
+App 128025 output: Auto-published scheduled notices at 2026-06-09T09:48:02.650Z
+App 128025 output: Auto-published scheduled notices at 2026-06-09T09:49:02.651Z
+App 128025 output: Auto-published scheduled notices at 2026-06-09T09:50:02.813Z
+App 603869 output: Warning: connect.session() MemoryStore is not
+App 603869 output: designed for a production environment, as it will leak
+App 603869 output: memory, and will not scale past a single process.
+App 603869 output: Server running on port 3000
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:04:30.561Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:05:30.559Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:06:30.589Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:07:30.602Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:08:30.621Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:09:30.638Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:10:30.679Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:11:30.698Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:12:30.728Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:13:30.759Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:14:30.798Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:15:30.819Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:16:30.854Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:17:30.878Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:18:30.909Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:19:30.940Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:20:30.968Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:21:30.998Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:22:31.030Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:23:31.058Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:24:31.079Z
+App 603869 output: Auto-published scheduled notices at 2026-06-09T13:25:31.108Z
+App 789116 output: Warning: connect.session() MemoryStore is not
+App 789116 output: designed for a production environment, as it will leak
+App 789116 output: memory, and will not scale past a single process.
+App 789116 output: Server running on port 3000
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:48:02.940Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:49:02.956Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:50:03.091Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:51:03.018Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:52:03.053Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:53:03.078Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:54:03.110Z
+App 789116 output: Auto-published scheduled notices at 2026-06-09T14:55:03.143Z
+App 820725 output: Warning: connect.session() MemoryStore is not
+App 820725 output: designed for a production environment, as it will leak
+App 820725 output: memory, and will not scale past a single process.
+App 820725 output: Server running on port 3000
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:06:46.690Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:07:46.715Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:08:46.744Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:09:46.775Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:10:46.809Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:11:46.834Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:12:46.864Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:13:46.894Z
+App 820725 output: Auto-published scheduled notices at 2026-06-09T15:14:46.928Z
+App 1148929 output: Warning: connect.session() MemoryStore is not
+App 1148929 output: designed for a production environment, as it will leak
+App 1148929 output: memory, and will not scale past a single process.
+App 1148929 output: Server running on port 3000
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T17:55:30.516Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T17:56:30.535Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T17:57:30.565Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T17:58:30.595Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T17:59:30.626Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:00:30.655Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:01:30.693Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:02:30.715Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:03:30.746Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:04:30.775Z
+App 1148929 output: Auto-published scheduled notices at 2026-06-09T18:05:30.805Z
+App 1394108 output: Warning: connect.session() MemoryStore is not
+App 1394108 output: designed for a production environment, as it will leak
+App 1394108 output: memory, and will not scale past a single process.
+App 1394108 output: Server running on port 3000
+App 1394108 output: Auto-published scheduled notices at 2026-06-09T19:25:37.061Z
+App 1394108 output: Auto-published scheduled notices at 2026-06-09T19:26:37.061Z
+App 1413201 output: Warning: connect.session() MemoryStore is not
+App 1413201 output: designed for a production environment, as it will leak
+App 1413201 output: memory, and will not scale past a single process.
+App 1413201 output: Server running on port 3000
+App 1457078 output: Warning: connect.session() MemoryStore is not
+App 1457078 output: designed for a production environment, as it will leak
+App 1457078 output: memory, and will not scale past a single process.
+App 1457078 output: Server running on port 3000
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:06:18.626Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:07:18.647Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:08:18.677Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:09:18.708Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:10:18.737Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:11:18.769Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:12:18.798Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:13:18.827Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:14:18.860Z
+App 1457078 output: Auto-published scheduled notices at 2026-06-09T20:15:18.887Z
+App 1880061 output: Warning: connect.session() MemoryStore is not
+App 1880061 output: designed for a production environment, as it will leak
+App 1880061 output: memory, and will not scale past a single process.
+App 1880061 output: Server running on port 3000
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:19:11.912Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:20:11.939Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:21:11.965Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:22:11.998Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:23:12.029Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:24:12.055Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:25:12.085Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:26:12.115Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:27:12.145Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:28:12.175Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:29:12.206Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:30:12.235Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:31:12.265Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:32:12.296Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:33:12.325Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:34:12.358Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:35:12.394Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:36:12.415Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:37:12.445Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:38:12.475Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:39:12.505Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:40:12.535Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:41:12.565Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:42:12.595Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:43:12.625Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:44:12.655Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:45:12.686Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:46:12.715Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:47:12.720Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:48:12.749Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:49:12.779Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:50:12.809Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:51:12.843Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:52:12.869Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:53:12.899Z
+App 1880061 output: Auto-published scheduled notices at 2026-06-10T00:54:12.929Z
+App 1951138 output: Warning: connect.session() MemoryStore is not
+App 1951138 output: designed for a production environment, as it will leak
+App 1951138 output: memory, and will not scale past a single process.
+App 1951138 output: Server running on port 3000
+App 2963745 output: Warning: connect.session() MemoryStore is not
+App 2963745 output: designed for a production environment, as it will leak
+App 2963745 output: memory, and will not scale past a single process.
+App 2963745 output: Server running on port 3000
+App 2963745 output: ROLE CHECK
+App 2963745 output: Session User: {
+App 2963745 output:   id: 3,
+App 2963745 output:   username: 'Chinembiri',
+App 2963745 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 2963745 output:   role: 'admin',
+App 2963745 output:   first_name: 'Chinembiri',
+App 2963745 output:   last_name: null,
+App 2963745 output:   unique_id: 'ADMIN001',
+App 2963745 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 2963745 output: }
+App 2963745 output: ROLE CHECK
+App 2963745 output: Session User: {
+App 2963745 output:   id: 3,
+App 2963745 output:   username: 'Chinembiri',
+App 2963745 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 2963745 output:   role: 'admin',
+App 2963745 output:   first_name: 'Chinembiri',
+App 2963745 output:   last_name: null,
+App 2963745 output:   unique_id: 'ADMIN001',
+App 2963745 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 2963745 output: }
+App 2963745 output: ROLE CHECK
+App 2963745 output: Session User: {
+App 2963745 output:   id: 3,
+App 2963745 output:   username: 'Chinembiri',
+App 2963745 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 2963745 output:   role: 'admin',
+App 2963745 output:   first_name: 'Chinembiri',
+App 2963745 output:   last_name: null,
+App 2963745 output:   unique_id: 'ADMIN001',
+App 2963745 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 2963745 output: }
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:21:12.517Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:22:12.546Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:23:12.576Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:24:12.611Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:25:12.636Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:26:12.667Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:27:12.696Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:28:12.706Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:29:12.736Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:30:12.766Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:31:12.796Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:32:12.826Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:33:12.853Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:34:12.883Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:35:12.885Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:36:12.892Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:37:12.920Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:38:12.950Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:39:12.986Z
+App 2963745 output: Auto-published scheduled notices at 2026-06-10T09:40:13.011Z
+App 3255198 output: Warning: connect.session() MemoryStore is not
+App 3255198 output: designed for a production environment, as it will leak
+App 3255198 output: memory, and will not scale past a single process.
+App 3255198 output: Server running on port 3000
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:23:34.350Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:24:34.369Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:25:34.401Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:26:34.429Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:27:34.464Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:28:34.489Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:29:34.519Z
+App 3255198 output: Auto-published scheduled notices at 2026-06-10T11:30:34.554Z
+App 3359958 output: Warning: connect.session() MemoryStore is not
+App 3359958 output: designed for a production environment, as it will leak
+App 3359958 output: memory, and will not scale past a single process.
+App 3359958 output: Server running on port 3000
+App 3468274 output: Warning: connect.session() MemoryStore is not
+App 3468274 output: designed for a production environment, as it will leak
+App 3468274 output: memory, and will not scale past a single process.
+App 3468274 output: Server running on port 3000
+App 3468274 output: Auto-published scheduled notices at 2026-06-10T12:33:49.978Z
+App 3468274 output: Auto-published scheduled notices at 2026-06-10T12:34:49.996Z
+App 3677551 output: Warning: connect.session() MemoryStore is not
+App 3677551 output: designed for a production environment, as it will leak
+App 3677551 output: memory, and will not scale past a single process.
+App 3677551 output: Server running on port 3000
+App 3677551 output: ROLE CHECK
+App 3677551 output: Session User: {
+App 3677551 output:   id: 3,
+App 3677551 output:   username: 'Chinembiri',
+App 3677551 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 3677551 output:   role: 'admin',
+App 3677551 output:   first_name: 'Chinembiri',
+App 3677551 output:   last_name: null,
+App 3677551 output:   unique_id: 'ADMIN001',
+App 3677551 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 3677551 output: }
+App 3677551 output: ROLE CHECK
+App 3677551 output: Session User: {
+App 3677551 output:   id: 3,
+App 3677551 output:   username: 'Chinembiri',
+App 3677551 output:   password: '$2b$10$2WDw91EdjDpxlHzEOW1/tu21bUciKJ/PaQms80LuahECsRz8pz9M6',
+App 3677551 output:   role: 'admin',
+App 3677551 output:   first_name: 'Chinembiri',
+App 3677551 output:   last_name: null,
+App 3677551 output:   unique_id: 'ADMIN001',
+App 3677551 output:   created_at: '2026-02-03T08:31:56.000Z'
+App 3677551 output: }
+App 3677551 output: Auto-published scheduled notices at 2026-06-10T14:01:20.282Z
+App 3677551 output: Auto-published scheduled notices at 2026-06-10T14:02:20.312Z
+App 3677551 output: Auto-published scheduled notices at 2026-06-10T14:03:20.342Z
+App 3677551 output: Auto-published scheduled notices at 2026-06-10T14:04:20.372Z
+App 3677551 output: Auto-published scheduled notices at 2026-06-10T14:05:20.378Z
+App 3734736 output: Warning: connect.session() MemoryStore is not
+App 3734736 output: designed for a production environment, as it will leak
+App 3734736 output: memory, and will not scale past a single process.
+App 3734736 output: Server running on port 3000
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:34:19.663Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:35:19.682Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:36:19.717Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:37:19.740Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:38:19.776Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:39:19.829Z
+App 3734736 output: Auto-published scheduled notices at 2026-06-10T14:40:19.838Z
+App 3950264 output: Warning: connect.session() MemoryStore is not
+App 3950264 output: designed for a production environment, as it will leak
+App 3950264 output: memory, and will not scale past a single process.
+App 3950264 output: Server running on port 3000
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:07:21.485Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:08:21.510Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:09:21.518Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:10:21.545Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:11:21.577Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:12:21.610Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:13:21.640Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:14:21.669Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:15:21.695Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:16:21.725Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:17:21.758Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:18:21.786Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:19:21.815Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:20:21.872Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:21:21.875Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:22:21.905Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:23:21.939Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:24:21.994Z
+App 3950264 output: Auto-published scheduled notices at 2026-06-10T16:25:21.994Z
+App 4107355 output: Warning: connect.session() MemoryStore is not
+App 4107355 output: designed for a production environment, as it will leak
+App 4107355 output: memory, and will not scale past a single process.
+App 4107355 output: Server running on port 3000
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:32:16.511Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:33:16.533Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:34:16.539Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:35:16.571Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:36:16.601Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:37:16.631Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:38:16.661Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:39:16.691Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:40:16.721Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:41:16.751Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:42:16.781Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:43:16.800Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:44:16.837Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:45:16.836Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:46:16.864Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:47:16.898Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:48:16.924Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:49:16.954Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:50:16.984Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:51:17.014Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:52:17.044Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:53:17.078Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:54:17.104Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:55:17.134Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:56:17.165Z
+App 4107355 output: Auto-published scheduled notices at 2026-06-10T17:57:17.189Z
+App 4153475 output: Warning: connect.session() MemoryStore is not
+App 4153475 output: designed for a production environment, as it will leak
+App 4153475 output: memory, and will not scale past a single process.
+App 4153475 output: Server running on port 3000
+App 540883 output: Warning: connect.session() MemoryStore is not
+App 540883 output: designed for a production environment, as it will leak
+App 540883 output: memory, and will not scale past a single process.
+App 540883 output: Server running on port 3000
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:10:47.428Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:11:47.450Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:12:47.480Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:13:47.510Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:14:47.538Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:15:47.549Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:16:47.579Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:17:47.610Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:18:47.641Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:19:47.669Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:20:47.699Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:21:47.730Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:22:47.760Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:23:47.789Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:24:47.819Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:25:47.824Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:26:47.853Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:27:47.884Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:28:47.913Z
+App 540883 output: Auto-published scheduled notices at 2026-06-10T22:29:47.943Z
+App 883057 output: Warning: connect.session() MemoryStore is not
+App 883057 output: designed for a production environment, as it will leak
+App 883057 output: memory, and will not scale past a single process.
+App 883057 output: Server running on port 3000
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:16:52.894Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:17:52.916Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:18:52.946Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:19:52.976Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:20:53.006Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:21:53.037Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:22:53.067Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:23:53.083Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:24:53.112Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:25:53.142Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:26:53.172Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:27:53.207Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:28:53.234Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:29:53.262Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:30:53.292Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:31:53.322Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:32:53.352Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:33:53.382Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:34:53.412Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:35:53.435Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:36:53.465Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:37:53.481Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:38:53.511Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:39:53.543Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:40:53.571Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:41:53.601Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:42:53.631Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:43:53.661Z
+App 883057 output: Auto-published scheduled notices at 2026-06-11T02:44:53.691Z

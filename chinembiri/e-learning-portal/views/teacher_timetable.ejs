@@ -1,0 +1,36 @@
+<section id="timetable" class="page-content active">
+    <h2>🕘 My Timetable</h2>
+
+    <div class="section-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(timetable.length === 0){ %>
+                    <tr>
+                        <td colspan="6" style="text-align:center;color:#888;">No timetable assigned yet.</td>
+                    </tr>
+                <% } else { %>
+                    <% timetable.forEach(entry => { %>
+                        <tr>
+                            <td><%= entry.day %></td>
+                            <td><%= entry.start_time %></td>
+                            <td><%= entry.end_time %></td>
+                            <td><%= entry.class_name %></td>
+                            <td><%= entry.subject %></td>
+                            <td><%= entry.room || "-" %></td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>

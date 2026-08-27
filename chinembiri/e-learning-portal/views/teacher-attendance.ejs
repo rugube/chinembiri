@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="header">
+    <h2>✅ Attendance</h2>
+    <a href="/teacher">⬅ Back to Dashboard</a>
+</header>
+
+<form method="POST" action="/teacher/attendance">
+    <select name="class_id" onchange="loadStudents(this.value)" required>
+        <option value="">Select Class</option>
+        <% classes.forEach(c => { %>
+            <option value="<%= c.id %>">
+                <%= c.name %> (<%= c.form_level %>)
+            </option>
+        <% }) %>
+    </select>
+
+    <table class="data-table" id="studentsTable">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Present</th>
+                <th>Absent</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button class="btn-primary">Save Attendance</button>
+</form>
+
+<script src="/teacher.js"></script>
+</body>
+</html>

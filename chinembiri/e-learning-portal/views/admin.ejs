@@ -1,0 +1,2842 @@
+<%
+  // ----------------------------
+  // SAFE FALLBACKS (prevents EJS crashes)
+  // ----------------------------
+  const safeUser =
+    (typeof user !== "undefined" && user)
+      ? user
+      : { first_name: "Admin", last_name: "", unique_id: "-" };
+
+  const safeStats =
+    (typeof stats !== "undefined" && stats)
+      ? stats
+      : { students: 0, teachers: 0, classes: 0, revenue: 0 };
+
+  const safeActivities =
+    (typeof activities !== "undefined" && activities)
+      ? activities
+      : [];
+
+  const safeStudents =
+    (typeof students !== "undefined" && students)
+      ? students
+      : [];
+
+  const safeTeachersList =
+    (typeof teachersList !== "undefined" && teachersList)
+      ? teachersList
+      : [];
+
+  const safeClassesList =
+    (typeof classesList !== "undefined" && classesList)
+      ? classesList
+      : [];
+
+  const safeClasses = safeClassesList;
+
+  const safeSubjects =
+    (typeof subjects !== "undefined" && subjects)
+      ? subjects
+      : [];
+
+  const safeFeeStructure =
+    (typeof feeStructure !== "undefined" && feeStructure)
+      ? feeStructure
+      : [];
+
+  const safeFinance =
+    (typeof finance !== "undefined" && finance)
+      ? finance
+      : {};
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Chinembiri Primary | Admin Portal</title>
+  <link rel="apple-touch-icon" href="/uploads/images/logo.png">
+  <link rel="icon" href="/uploads/images/favicon.ico" type="image/x-icon">
+
+  <!-- Bootstrap (for offcanvas + grid + responsive helpers) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Your existing styles -->
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    :root{ font-size: clamp(14px, 1.05vw + 11px, 18px); }
+    body{ -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+    /* Topbar (same vibe as Teacher portal) */
+    .topbar{
+      background: rgba(13, 27, 42, 0.92);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      z-index: 1030; /* same as bootstrap sticky top */
+    }
+    .topbar a{ color:#fff; text-decoration:none; }
+    .topbar a:hover{ text-decoration: underline; }
+
+    /* Offcanvas look */
+    .portal-offcanvas{
+      width: min(340px, 90vw);
+      background:#0d1b2a;
+      color:#fff;
+    }
+    .portal-offcanvas .offcanvas-title{ color:#fff; }
+
+    /* Navigation buttons style (works for both desktop + mobile) */
+    .portal-nav .btn{
+      text-align:left;
+      border-radius:14px;
+      padding:.75rem .85rem;
+      color:#fff;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .portal-nav .btn:hover{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(76,201,240,0.35);
+    }
+    .portal-nav .btn.active{
+      background: rgba(76,201,240,0.16);
+      border-color: rgba(76,201,240,0.45);
+    }
+    .nav-ico{ width: 1.6rem; display:inline-block; }
+
+    /* Desktop sidebar sticky */
+    @media (min-width: 992px){
+      .portal-sidebar{
+        position: sticky;
+        top: 76px;
+        height: calc(100vh - 76px);
+        overflow:auto;
+        padding-bottom:18px;
+      }
+    }
+
+    /* Responsive tables */
+    .apro-table-wrap{
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius:16px;
+    }
+
+    /* prevent content width blowouts on large tables */
+    .content-area{ min-width:0; }
+
+    /* helpers */
+    .only-desktop{ display:none; }
+    @media (min-width: 992px){ .only-desktop{ display:block; } }
+    .only-mobile{ display:block; }
+    @media (min-width: 992px){ .only-mobile{ display:none; } }
+
+    .page-shell{ padding-top: 18px; padding-bottom: 28px; }
+
+    /* optional: give tables a minimum width like your teacher layout */
+    table{ min-width: 760px; }
+  </style>
+</head>
+
+<body>
+
+<!-- =========================
+     TOPBAR (replaces old header)
+========================= -->
+<header class="topbar sticky-top">
+  <div class="container-fluid px-3 px-lg-4 py-2">
+    <div class="d-flex align-items-center justify-content-between gap-2">
+
+      <!-- Left: title + mobile menu -->
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-light only-mobile"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sidebarOffcanvasAdmin"
+                aria-controls="sidebarOffcanvasAdmin"
+                aria-label="Open menu">
+          ☰
+        </button>
+
+        <div class="lh-sm">
+          <div class="fw-bold">👨‍💼 Admin Portal - Chinembiri Primary</div>
+          <small class="opacity-75">Welcome, <%= safeUser.first_name %> <%= safeUser.last_name %></small>
+        </div>
+      </div>
+
+      <!-- Right: ID + logout -->
+      <div class="text-end lh-sm">
+        <small class="opacity-75 d-block">Admin ID</small>
+        <div class="fw-bold"><%= safeUser.unique_id %></div>
+        <a class="d-inline-block mt-1" href="/logout">🔒 Logout</a>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<!-- =========================
+     LAYOUT
+========================= -->
+<div class="container-fluid px-0">
+  <div class="row g-0">
+
+    <!-- =========================
+         DESKTOP SIDEBAR
+    ========================= -->
+    <aside class="col-lg-3 col-xl-2 d-none d-lg-block border-end" style="background:#0d1b2a;">
+      <div class="portal-sidebar p-3">
+
+        <!-- Brand / context header -->
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-2" style="color:#fff;">
+            <span style="font-size:1.4rem;">🏫</span>
+            <div>
+              <div class="fw-bold">Admin Portal</div>
+              <small class="opacity-75">School Management</small>
+            </div>
+          </div>
+        </div>
+
+        <nav class="portal-nav d-grid gap-2" aria-label="Admin navigation">
+          <button type="button" class="btn nav-item active" onclick="setActiveAdmin(this); showPage('dashboard')">
+            <span class="nav-ico">🏠</span><span>Dashboard</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('students')">
+            <span class="nav-ico">👥</span><span>Students</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('teachers')">
+            <span class="nav-ico">👨‍🏫</span><span>Teachers</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('classes')">
+            <span class="nav-ico">📚</span><span>Classes</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('subjects')">
+            <span class="nav-ico">📘</span><span>Subjects</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('fees')">
+            <span class="nav-ico">💰</span><span>Fees</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('library')">
+            <span class="nav-ico">🏛️</span><span>Library</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('notices')">
+            <span class="nav-ico">📢</span><span>Notices</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('reports')">
+            <span class="nav-ico">📈</span><span>Reports</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('finance')">
+            <span class="nav-ico">💼</span><span>Finance</span>
+          </button>
+
+          <button type="button" class="btn nav-item" onclick="setActiveAdmin(this); showPage('system')">
+            <span class="nav-ico">⚙️</span><span>System</span>
+          </button>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================= -->
+    <main class="col-12 col-lg-9 col-xl-10 content-area">
+      <div class="container page-shell">
+
+        <!-- ================= DASHBOARD ================= -->
+        <section id="dashboard" class="page-content active">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">📊 School Administration</h2>
+              <p class="apro-subtitle">Overview of students, staff, classes and revenue.</p>
+            </div>
+            <span class="apro-chip">Today: <%= new Date().toDateString() %></span>
+          </div>
+
+          <div class="apro-stats">
+            <div class="apro-stat">
+              <div class="apro-stat-top"><span class="apro-ico">👥</span><span class="apro-label">Total Students</span></div>
+              <div class="apro-value"><%= safeStats.students %></div>
+            </div>
+
+            <div class="apro-stat">
+              <div class="apro-stat-top"><span class="apro-ico">👨‍🏫</span><span class="apro-label">Total Teachers</span></div>
+              <div class="apro-value"><%= safeStats.teachers %></div>
+            </div>
+
+            <div class="apro-stat">
+              <div class="apro-stat-top"><span class="apro-ico">🏫</span><span class="apro-label">Active Classes</span></div>
+              <div class="apro-value"><%= safeStats.classes %></div>
+            </div>
+
+            <div class="apro-stat">
+              <div class="apro-stat-top"><span class="apro-ico">💵</span><span class="apro-label">Monthly Revenue</span></div>
+              <div class="apro-value">$<%= safeStats.revenue %></div>
+            </div>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">⚡ Quick Actions</h3>
+            </div>
+
+            <div class="apro-actions">
+              <button class="apro-btn apro-btn-primary" onclick="openAddStudent()">➕ Add Student</button>
+              <button class="apro-btn apro-btn-primary" onclick="openAddTeacher()">➕ Add Teacher</button>
+              <button class="apro-btn" onclick="openAddNotice?.()">📢 Publish Notice</button>
+              <button class="apro-btn" onclick="openFeeReport?.()">📄 Generate Report</button>
+              <button class="apro-btn" onclick="openSettings?.()">⚙️ System Settings</button>
+            </div>
+          </div>
+
+          <div class="apro-card" style="margin-top:14px;">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">🕘 Recent Activity</h3>
+              <span class="apro-chip"><%= safeActivities?.length ?? 0 %> events</span>
+            </div>
+
+            <% if (!safeActivities || safeActivities.length === 0) { %>
+              <p class="apro-center-muted">No recent activity.</p>
+            <% } else { %>
+              <div class="apro-list">
+                <% safeActivities.forEach(a => { %>
+                  <div class="apro-item">
+                    <p class="apro-item-desc"><%= a.message %></p>
+                    <small class="apro-meta"><%= new Date(a.created_at).toDateString() %></small>
+                  </div>
+                <% }) %>
+              </div>
+            <% } %>
+          </div>
+        </section>
+
+        <!-- ================= STUDENTS ================= -->
+        <section id="students" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">👥 Student Directory</h2>
+              <p class="apro-subtitle">Search, filter, add and manage student records.</p>
+            </div>
+            <span class="apro-chip"><%= safeStudents?.length ?? 0 %> students</span>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-toolbar">
+              <input class="apro-input" type="text" placeholder="🔍 Search students..." onkeyup="searchStudents(this.value)">
+
+              <select class="apro-select" onchange="filterForm(this.value)">
+                <option value="">All Levels</option>
+                <option value="ECD A">ECD A</option><option value="ECD B">ECD B</option>
+                <option value="GRADE 1">GRADE 1</option><option value="GRADE 2">GRADE 2</option>
+                <option value="GRADE 3">GRADE 3</option><option value="GRADE 4">GRADE 4</option>
+                <option value="GRADE 5">GRADE 5</option><option value="GRADE 6">GRADE 6</option>
+                <option value="GRADE 7">GRADE 7</option>
+                <option disabled>────────</option>
+                <option value="Form 1">Form 1</option><option value="Form 2">Form 2</option>
+                <option value="Form 3">Form 3</option><option value="Form 4">Form 4</option>
+                <option value="Form 5">Form 5</option><option value="Form 6">Form 6</option>
+              </select>
+
+              <button class="apro-btn apro-btn-primary" onclick="openAddStudent()">➕ Add Student</button>
+              <button class="apro-btn apro-btn-primary" onclick="openImportStudents()">📥 Import Students</button>
+              <a href="/admin/students/export" class="apro-btn apro-btn-sm">📤 Export CSV</a>
+            </div>
+
+            <div class="apro-table-wrap">
+              <table class="data-table admin-table student-table" id="studentsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Reg No</th><th>Name</th><th>Form</th><th>Email</th>
+                    <th>Phone</th><th>DOB</th><th>Birth / National ID</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!safeStudents || safeStudents.length === 0) { %>
+                    <tr><td colspan="10" class="apro-center-muted">No students found.</td></tr>
+                  <% } else { %>
+                    <% safeStudents.forEach(s => { %>
+                      <tr>
+                        <td><%= s.id %></td>
+                        <td class="td-strong"><%= s.unique_id %></td>
+                        <td><%= s.first_name %> <%= s.last_name %></td>
+                        <td><span class="apro-pill"><%= s.form_level %></span></td>
+                        <td><%= s.email %></td>
+                        <td><%= s.phone || "-" %></td>
+                        <td><%= s.date_of_birth ? String(s.date_of_birth).slice(0,10) : "-" %></td>
+                        <td><%= s.birth_id_number || "-" %></td>
+                        <td>
+                          <span class="apro-badge <%= (s.status || 'active') === 'active' ? 'apro-badge-ok' : 'apro-badge-bad' %>">
+                            <%= (s.status || "active").toUpperCase() %>
+                          </span>
+                        </td>
+                        <td class="col-actions">
+                        
+                          <button
+                            class="apro-btn apro-btn-sm"
+                            onclick='openEditStudent(<%- JSON.stringify(s) %>)'>
+                            ✏️ Edit
+                          </button>
+                        
+                          <form
+                            method="POST"
+                            action="/admin/students/delete/<%= s.id %>"
+                            style="display:inline">
+                        
+                            <button class="apro-btn apro-btn-danger apro-btn-sm">
+                              🗑 Delete
+                            </button>
+                        
+                          </form>
+                        
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TEACHERS ================= -->
+        <section id="teachers" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">👨‍🏫 Teacher Management</h2>
+              <p class="apro-subtitle">Search, filter, import and manage teaching staff.</p>
+            </div>
+            <span class="apro-chip"><%= safeTeachersList?.length ?? 0 %> teachers</span>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-toolbar">
+              <input class="apro-input" type="text" placeholder="🔍 Search teachers..." onkeyup="filterTeachers(this.value)">
+
+              <select class="apro-select" onchange="filterDepartment(this.value)">
+                <option value="">All Departments</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Sciences">Sciences</option>
+                <option value="Languages">Languages</option>
+                <option value="Humanities">Humanities</option>
+                <option value="Infancy">Infancy</option>
+                <option value="Junior">Junior</option>
+                <option value="ICT">ICT</option>
+              </select>
+
+              <button class="apro-btn apro-btn-primary" onclick="openAddTeacher()">➕ Add Teacher</button>
+              <button class="apro-btn apro-btn-primary" onclick="openImportTeachers()">📥 Import Teachers</button>
+              <a href="/admin/teachers/export" class="apro-btn apro-btn-sm">📤 Export CSV</a>
+            </div>
+
+            <div class="apro-table-wrap">
+              <table class="data-table admin-table teacher-table" id="teachersTable">
+                <thead>
+                  <tr>
+                    <th>Teacher ID</th><th>Name</th><th>Department</th><th>Email</th>
+                    <th>ID Number</th><th>Appointment Date</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!safeTeachersList || safeTeachersList.length === 0) { %>
+                    <tr><td colspan="8" class="apro-center-muted">No teachers added yet.</td></tr>
+                  <% } else { %>
+                    <% safeTeachersList.forEach(t => { %>
+                      <tr>
+                        <td class="td-strong"><%= t.unique_id %></td>
+                        <td><%= t.first_name %> <%= t.last_name %></td>
+                        <td><span class="apro-pill"><%= t.department %></span></td>
+                        <td><%= t.email %></td>
+                        <td><%= t.employee_number || "-" %></td>
+                        <td><%= t.date_of_appointment ? String(t.date_of_appointment).slice(0,10) : "-" %></td>
+                        <td>
+                          <span class="apro-badge <%= (t.status || 'active') === 'active' ? 'apro-badge-ok' : 'apro-badge-bad' %>">
+                            <%= (t.status || "active").toUpperCase() %>
+                          </span>
+                        </td>
+                        <td class="col-actions">
+                          <button class="apro-btn apro-btn-sm" onclick='openEditTeacher(<%- JSON.stringify(t) %>)'>✏️ Edit</button>
+                          <form method="POST" action="/admin/teachers/delete/<%= t.id %>" style="display:inline">
+                            <button class="apro-btn apro-btn-danger apro-btn-sm">🗑 Delete</button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= CLASSES ================= -->
+        <section id="classes" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">📚 Class Management</h2>
+              <p class="apro-subtitle">Create classes, assign teachers, students and subjects.</p>
+            </div>
+            <span class="apro-chip"><%= safeClassesList?.length ?? 0 %> classes</span>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-toolbar">
+              <button class="apro-btn apro-btn-primary" onclick="openAddClass()">➕ Create Class</button>
+              <button class="apro-btn" onclick="openAssignTeacher()">👨‍🏫 Assign Teacher</button>
+              <button class="apro-btn" onclick="openAssignStudent()">👨‍🎓 Assign Students</button>
+              <button class="apro-btn" onclick="openAssignSubjects()">📘 Assign Subjects</button>
+              <button class="apro-btn" onclick="openTeacherModal()">Deassign Teacher</button>
+            </div>
+
+            <div class="apro-table-wrap">
+              <table class="data-table admin-table classes-table">
+                <thead>
+                  <tr>
+                    <th>Class ID</th><th>Name</th><th>Form Level</th><th>Teacher</th><th>Room</th><th>Students</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!safeClassesList || safeClassesList.length === 0) { %>
+                    <tr><td colspan="7" class="apro-center-muted">No classes created yet.</td></tr>
+                  <% } else { %>
+                    <% safeClassesList.forEach(c => { %>
+                      <tr>
+                        <td class="td-strong"><%= c.class_code %></td>
+                        <td><%= c.name %></td>
+                        <td><span class="apro-pill"><%= c.form_level %></span></td>
+                        <td><%= c.teachers || "Unassigned" %></td>
+                        <td><%= c.room || "-" %></td>
+                        <td><span class="apro-pill"><%= c.students %></span></td>
+                        <td class="col-actions">
+                        
+                          <button
+                            type="button"
+                            class="apro-btn apro-btn-primary apro-btn-sm"
+                            onclick="viewClassStudents('<%= c.id %>', '<%= c.name %>')">
+                            👨‍🎓 View Students
+                          </button>
+                        
+                          <button
+                            class="apro-btn apro-btn-sm"
+                            onclick='openEditClass(<%- JSON.stringify(c) %>)'>
+                            ✏️ Edit
+                          </button>
+                        
+                          <form
+                            method="POST"
+                            action="/admin/classes/delete/<%= c.id %>"
+                            style="display:inline">
+                        
+                            <button class="apro-btn apro-btn-danger apro-btn-sm">
+                              🗑 Delete
+                            </button>
+                        
+                          </form>
+                        
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SUBJECTS ================= -->
+        <section id="subjects" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">📘 Subjects</h2>
+              <p class="apro-subtitle">Manage school subjects and updates.</p>
+            </div>
+            <span class="apro-chip"><%= safeSubjects?.length ?? 0 %> subjects</span>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-toolbar">
+              <button class="apro-btn apro-btn-primary" onclick="openAddSubject()">➕ Add Subject</button>
+            </div>
+
+            <div class="apro-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Subject Name</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  <% if (safeSubjects && safeSubjects.length) { %>
+                    <% safeSubjects.forEach(s => { %>
+                      <tr>
+                        <td><%= s.id %></td>
+                        <td class="td-strong"><%= s.name %></td>
+                        <td class="col-actions">
+                          <button class="apro-btn apro-btn-sm" onclick='openEditSubject(<%- JSON.stringify(s) %>)'>✏️</button>
+                          <form method="POST" action="/admin/subjects/delete/<%= s.id %>" style="display:inline">
+                            <button class="apro-btn apro-btn-danger apro-btn-sm">🗑</button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="3" class="apro-center-muted">No subjects added yet.</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= FEES ================= -->
+        <section id="fees" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">💰 Fee Management</h2>
+              <p class="apro-subtitle">Set fees, record payments and view reports.</p>
+            </div>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">💱 Fee Administration</h3>
+            </div>
+
+            <div class="apro-toolbar">
+              <button class="apro-btn apro-btn-primary" onclick="openFeeStructure()">💰 Set Fee Structure</button>
+              <button class="apro-btn" onclick="openPaymentModal()">💳 Record Payment</button>
+              <button class="apro-btn" onclick="openFeeReport()">📊 Fee Reports</button>
+            </div>
+
+            <div class="apro-divider"></div>
+
+            <h3 class="apro-section-title">Current Fee Structure</h3>
+
+            <div class="apro-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Form Level</th>
+                    <th>Term Fee</th>
+                    <th>Annual Fee</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (safeFeeStructure && safeFeeStructure.length) { %>
+                    <% safeFeeStructure.forEach(f => { %>
+                      <tr>
+                        <td class="td-strong"><%= f.form_level %></td>
+                        <td>$<%= f.term_fee %></td>
+                        <td>$<%= f.annual_fee %></td>
+                        <td>
+                          <button class="apro-btn apro-btn-sm" onclick='openEditFee(<%- JSON.stringify(f) %>)'>Edit</button>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="4" class="apro-center-muted">No fee structure set yet.</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= LIBRARY ================= -->
+        <section id="library" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">🏛️ Library Management</h2>
+              <p class="apro-subtitle">Manage physical and digital resources.</p>
+            </div>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">📚 Resource Management</h3>
+            </div>
+
+            <div class="apro-toolbar">
+              <button class="apro-btn apro-btn-primary" onclick="openAddResource()">➕ Add Book</button>
+              <button class="apro-btn" onclick="openAddDigital()">💾 Add Digital Resource</button>
+              <button class="apro-btn" onclick="openBorrowManager()">🔄 Manage Borrowing</button>
+            </div>
+
+            <div class="apro-toolbar" style="margin-top:10px;">
+              <input class="apro-input" type="text" placeholder="🔍 Search resources..." onkeyup="filterLibrary(this.value)" style="max-width:280px;">
+            </div>
+
+            <div class="apro-table-wrap" style="margin-top:10px;">
+              <table class="data-table admin-table library-table" id="libraryTable">
+                <thead>
+                  <tr>
+                    <th onclick="sortLibrary(0)">ID</th>
+                    <th onclick="sortLibrary(1)">Title</th>
+                    <th onclick="sortLibrary(2)">Author</th>
+                    <th onclick="sortLibrary(3)">Category</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th class="col-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- DYNAMICALLY LOADED -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= NOTICES ================= -->
+        <section id="notices" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">📢 Notice Management</h2>
+              <p class="apro-subtitle">Create, schedule and manage school notices.</p>
+            </div>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">📝 Create & Manage Notices</h3>
+            </div>
+
+            <div class="apro-toolbar">
+              <button class="apro-btn apro-btn-primary" onclick="openAddNotice()">📢 Publish Notice</button>
+              <button class="apro-btn" onclick="openScheduleNotice()">⏰ Schedule Notice</button>
+              <button class="apro-btn" type="button">📄 Notice Templates</button>
+            </div>
+
+            <div class="apro-divider"></div>
+
+            <div id="noticesList" class="notice-list">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= REPORTS ================= -->
+        <section id="reports" class="page-content">
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">📊 System Reports</h2>
+              <p class="apro-subtitle">Analytics dashboard with KPIs and report breakdowns.</p>
+            </div>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-toolbar" style="margin-bottom:12px;">
+              <button class="apro-btn apro-btn-primary" onclick="loadReport('student')">Student Report</button>
+              <button class="apro-btn apro-btn-primary" onclick="loadReport('teacher')">Teacher Report</button>
+              <button class="apro-btn apro-btn-primary" onclick="loadReport('financial')">Financial Report</button>
+              <button class="apro-btn apro-btn-primary" onclick="loadReport('academic')">Academic Report</button>
+            </div>
+
+            <div id="reportKPI" class="apro-stats">
+              <!-- Dynamic KPI cards injected here -->
+            </div>
+
+            <div id="reportContent" style="margin-top:14px;"></div>
+          </div>
+        </section>
+
+        <!-- ================= FINANCE ================= -->
+        <section id="finance" class="page-content">
+
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">💼 Finance Management</h2>
+              <p class="apro-subtitle">Invoices, payments, suppliers, purchases, expenses, payroll and ledger.</p>
+            </div>
+            <span class="apro-chip">Exports + Tabs</span>
+          </div>
+
+          <!-- EXPORTS -->
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">📤 Exports</h3>
+              <span class="apro-chip">CSV</span>
+            </div>
+
+            <div class="apro-actions">
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/invoices">📤 Export Invoices CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/payments">📤 Export Payments CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/expenses">📤 Export Expenses CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/purchases">📤 Export Purchases CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/ledger">📤 Export Ledger CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/assets">📤 Export Assets CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/suppliers">📤 Export Suppliers CSV</a>
+              <a class="apro-btn apro-btn-sm apro-btn-outline" href="/admin/finance/export/beam-camfed">📤 Export BEAM/CAMFED CSV</a>
+            </div>
+          </div>
+
+          <!-- TAB BUTTONS -->
+          <div class="apro-card" style="margin-top:14px;">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">📌 Finance Tabs</h3>
+              <span class="apro-chip">Switch Views</span>
+            </div>
+
+            <div class="apro-fin-tabs">
+              <button type="button" class="apro-fin-tabbtn is-active" onclick="showFinanceTab('finance-dashboard')">📊 Dashboard</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-create-invoice')">🧾 Create Invoice</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-invoices')">📄 Invoices</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-debtors')">🧑‍🎓 Debtors</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-beam-camfed')">🎓 BEAM/CAMFED</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-payments')">💳 Payments</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-receipts')">🧾 Receipts</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-student-ledger')">📒 Student Ledger</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-statements')">📑 Statements</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-cashbook')">🏦 Cashbook</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-budgets')">🎯 Budgets</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-audit')">🛡️ Audit Trail</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-suppliers')">🏭 Suppliers</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-purchases')">📦 Purchases</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-expenses')">📉 Expenses</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-payslips')">🧑🏽‍🏫 Payslips</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-ledger')">📘 Ledger</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-employees')">🧑 Employees</button>
+              <button type="button" class="apro-fin-tabbtn" onclick="showFinanceTab('finance-assets')">🏢 Assets</button>
+            </div>
+          </div>
+
+          <!-- DASHBOARD -->
+          <div id="finance-dashboard" class="finance-tab active">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">📊 Finance Overview</h3>
+                <span class="apro-chip">Summary</span>
+              </div>
+
+              <div class="apro-stats apro-stats-3">
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">⬆️</span><span class="apro-label">Total Income</span></div>
+                  <div class="apro-value">$<%= safeFinance?.total_income || 0 %></div>
+                </div>
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">⬇️</span><span class="apro-label">Total Expenses</span></div>
+                  <div class="apro-value">$<%= safeFinance?.total_expenses || 0 %></div>
+                </div>
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">🧾</span><span class="apro-label">Net Balance</span></div>
+                  <div class="apro-value">$<%= (safeFinance?.total_income || 0) - (safeFinance?.total_expenses || 0) %></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- CREATE INVOICE -->
+        <div id="finance-create-invoice" class="finance-tab">
+          <div class="apro-card" style="margin-top:14px;">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">🧾 Create Invoice</h3>
+              <span class="apro-chip">Billing</span>
+            </div>
+        
+            <p class="apro-hint" style="margin-top:6px;">
+              Create invoices for <b>one student</b>, <b>a level</b>, <b>a class</b>, or the <b>whole school</b>.
+              Paid/Balances will use Fees payments (optionally filtered by the date range).
+            </p>
+        
+            <form method="POST" action="/admin/finance/invoices" class="apro-form-grid" id="invoice-form">
+              <select name="scope" id="invoiceScope" required onchange="toggleInvoiceScope()">
+                <option value="single">Single Student</option>
+                <option value="level">Per Level</option>
+                <option value="class">Per Class</option>
+                <option value="school">Whole School</option>
+              </select>
+        
+              <select name="student_id" id="invoiceStudent" required>
+                <option value="">Select Student</option>
+                <% if (safeStudents && safeStudents.length) { safeStudents.forEach(s => { %>
+                  <option value="<%= s.id %>">
+                    <%= s.unique_id %> — <%= s.first_name %> <%= s.last_name %> (<%= s.form_level %>)
+                  </option>
+                <% }) } %>
+              </select>
+        
+              <select name="form_level" id="invoiceLevel" style="display:none;">
+                <option value="">Select Level</option>
+                <option value="ECD A">ECD A</option><option value="ECD B">ECD B</option>
+                <option value="GRADE 1">GRADE 1</option><option value="GRADE 2">GRADE 2</option>
+                <option value="GRADE 3">GRADE 3</option><option value="GRADE 4">GRADE 4</option>
+                <option value="GRADE 5">GRADE 5</option><option value="GRADE 6">GRADE 6</option>
+                <option value="GRADE 7">GRADE 7</option>
+                <option disabled>────────</option>
+                <option value="Form 1">Form 1</option><option value="Form 2">Form 2</option>
+                <option value="Form 3">Form 3</option><option value="Form 4">Form 4</option>
+                <option value="Form 5">Form 5</option><option value="Form 6">Form 6</option>
+              </select>
+        
+              <select name="class_id" id="invoiceClass" style="display:none;">
+                <option value="">Select Class</option>
+                <% if (safeClasses && safeClasses.length) { safeClasses.forEach(c => { %>
+                  <option value="<%= c.id %>"><%= c.name %> (<%= c.form_level %>)</option>
+                <% }) } %>
+              </select>
+        
+              <select name="term" required>
+                <option value="">Term</option>
+                <option value="Term 1">Term 1</option>
+                <option value="Term 2">Term 2</option>
+                <option value="Term 3">Term 3</option>
+              </select>
+        
+              <input name="year" type="number" placeholder="Year (e.g 2026)" required>
+        
+              <!-- ✅ Optional date range to compute Paid like Fees Report -->
+              <input name="pay_start" type="date" placeholder="Start date (optional)">
+              <input name="pay_end" type="date" placeholder="End date (optional)">
+        
+              <button class="apro-btn apro-btn-primary" type="submit" id="invoiceSubmitBtn">
+                💾 Create Invoice(s)
+              </button>
+            </form>
+        
+            <div id="invoiceBulkMsg" class="apro-hint" style="display:none;margin-top:10px;"></div>
+        
+            <p class="apro-hint" style="margin-top:10px;">
+              Tip: Amount is pulled automatically from <b>Fee Structure (term fee)</b>.
+              Payments shown in invoices come from <b>Fees</b>.
+            </p>
+          </div>
+        </div>
+                
+        <!-- INVOICES -->
+        <div id="finance-invoices" class="finance-tab">
+          <div class="apro-card" style="margin-top:14px;">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">📄 Student Invoices</h3>
+              <span class="apro-chip"><%= safeFinance?.invoices?.length ?? 0 %> records</span>
+            </div>
+        
+            <div class="apro-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Student</th><th>Term</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (safeFinance?.invoices?.length) { %>
+                    <% safeFinance.invoices.forEach(i => { %>
+                      <tr>
+                        <td class="td-strong">#<%= i.id %></td>
+                        <td>
+                          <%= (i.first_name ? i.first_name.trim()[0].toUpperCase() + '.' : '') %>
+                          <%= ' ' + (i.last_name || '').trim() %>
+                        </td>
+        
+                        <td>
+                          <span class="apro-pill"><%= i.term %> <%= i.year %></span>
+                        </td>
+        
+                        <td>$<%= Number(i.total_amount || 0).toFixed(2) %></td>
+                        <td>$<%= Number(i.paid_amount || 0).toFixed(2) %></td>
+                        <td class="td-strong">$<%= Number(i.balance || 0).toFixed(2) %></td>
+        
+                        <td>
+                          <span class="apro-badge apro-badge-neutral"><%= i.status || 'UNPAID' %></span>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="7" class="apro-center-muted">No invoices found.</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEBTORS -->
+        <div id="finance-debtors" class="finance-tab">
+          <div class="apro-card" style="margin-top:14px;">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">🧑‍🎓 Debtor List</h3>
+              <span class="apro-chip"><span id="debtorsCount">0</span> students</span>
+            </div>
+        
+            <p class="apro-hint" style="margin-top:6px;">
+              Shows students with <b>outstanding balances</b> (invoices minus payments). Use the date filter to limit by <b>invoice created date</b>.
+            </p>
+        
+            <div class="apro-form-grid" style="margin-top:8px;">
+              <input type="date" id="debtorsFrom" placeholder="From date">
+              <input type="date" id="debtorsTo" placeholder="To date">
+            
+            <select id="debtorsClass">
+                <option value="">All Classes</option>
+                <% safeClasses.forEach(c => { %>
+                    <option value="<%= c.id %>"><%= c.name %></option>
+                <% }) %>
+            </select>
+            
+            <select id="debtorsForm">
+                <option value="">All Grades</option>
+                <option value="ECD A">ECD A</option>
+                <option value="ECD B">ECD B</option>
+                <option value="GRADE 1">GRADE 1</option>
+                <option value="GRADE 2">GRADE 2</option>
+                <option value="GRADE 3">GRADE 3</option>
+                <option value="GRADE 4">GRADE 4</option>
+                <option value="GRADE 5">GRADE 5</option>
+                <option value="GRADE 6">GRADE 6</option>
+                <option value="GRADE 7">GRADE 7</option>
+            </select>
+            
+              <button type="button" class="apro-btn apro-btn-primary" onclick="loadDebtors()">🔎 Apply Filter</button>
+              <button type="button" class="apro-btn apro-btn-outline" onclick="clearDebtorsFilter()">♻️ Clear</button>
+            </div>
+        
+            <div class="apro-hint" style="margin-top:8px;">
+              Total outstanding: <b>$<span id="debtorsTotal">0.00</span></b>
+            </div>
+        
+            <div class="apro-table-wrap" style="margin-top:12px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Level</th>
+                    <th>Class</th>
+                    <th>Invoiced</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="debtorsBody">
+                  <tr><td colspan="6" class="apro-center-muted">Select a date range then click Apply Filter.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+          <!-- BEAM / CAMFED -->
+          <div id="finance-beam-camfed" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🎓 BEAM / CAMFED Support</h3>
+                <span class="apro-chip"><%= safeFinance?.beamCamfed?.length ?? 0 %> records</span>
+              </div>
+
+              <p class="apro-hint" style="margin-top:6px;">
+                Record students whose school fees are supported by <b>BEAM</b>, <b>CAMFED</b>, or another sponsor.
+                Paid sponsor amounts are also captured as sponsored fee payments by the backend.
+              </p>
+
+              <div class="apro-stats apro-stats-3" style="margin-top:12px;">
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">🎯</span><span class="apro-label">Approved Support</span></div>
+                  <div class="apro-value">$<%= Number(safeFinance?.beamCamfedStats?.approved || 0).toFixed(2) %></div>
+                </div>
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">✅</span><span class="apro-label">Paid by Sponsor</span></div>
+                  <div class="apro-value">$<%= Number(safeFinance?.beamCamfedStats?.paid || 0).toFixed(2) %></div>
+                </div>
+                <div class="apro-stat">
+                  <div class="apro-stat-top"><span class="apro-ico">⏳</span><span class="apro-label">Sponsor Balance</span></div>
+                  <div class="apro-value">$<%= Number(safeFinance?.beamCamfedStats?.balance || 0).toFixed(2) %></div>
+                </div>
+              </div>
+
+              <form method="POST" action="/admin/finance/beam-camfed/add" class="apro-form-grid" style="margin-top:14px;">
+                <select name="student_id" required>
+                  <option value="">Select Student</option>
+                  <% if (safeStudents && safeStudents.length) { safeStudents.forEach(s => { %>
+                    <option value="<%= s.id %>">
+                      <%= s.unique_id %> — <%= s.first_name %> <%= s.last_name %> (<%= s.form_level || '-' %>)
+                    </option>
+                  <% }) } %>
+                </select>
+
+                <select name="sponsor_type" required>
+                  <option value="BEAM">BEAM</option>
+                  <option value="CAMFED">CAMFED</option>
+                  <option value="DONOR">DONOR</option>
+                  <option value="OTHER">OTHER</option>
+                </select>
+
+                <input name="approved_amount" type="number" step="0.01" placeholder="Approved Amount" required>
+                <input name="paid_amount" type="number" step="0.01" placeholder="Paid Amount" value="0">
+                <input name="support_date" type="date" title="Support Date">
+                <input name="payment_date" type="date" title="Payment Date">
+                <input name="reference" placeholder="Reference / Voucher No.">
+                <input name="notes" placeholder="Notes (optional)">
+
+                <button class="apro-btn apro-btn-primary" type="submit">
+                  💾 Save BEAM/CAMFED Support
+                </button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:14px;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Student</th>
+                      <th>Level</th>
+                      <th>Sponsor</th>
+                      <th>Approved</th>
+                      <th>Paid</th>
+                      <th>Balance</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.beamCamfed?.length) { %>
+                      <% safeFinance.beamCamfed.forEach((b, index) => { %>
+                        <tr>
+                          <td><%= index + 1 %></td>
+                          <td>
+                            <span class="td-strong"><%= b.unique_id || '-' %></span><br>
+                            <%= b.first_name || '' %> <%= b.last_name || '' %>
+                          </td>
+                          <td><%= b.form_level || '-' %></td>
+                          <td><span class="apro-pill"><%= b.sponsor_type || '-' %></span></td>
+                          <td>$<%= Number(b.approved_amount || 0).toFixed(2) %></td>
+                          <td>$<%= Number(b.paid_amount || 0).toFixed(2) %></td>
+                          <td class="td-strong">$<%= Number(b.balance || 0).toFixed(2) %></td>
+                          <td><span class="apro-badge apro-badge-neutral"><%= b.status || 'PENDING' %></span></td>
+                          <td><%= b.created_at ? String(b.created_at).slice(0,10) : '-' %></td>
+                          <td>
+                            <form method="POST" action="/admin/finance/beam-camfed/delete/<%= b.id %>" onsubmit="return confirm('Delete this BEAM/CAMFED record?');">
+                              <button class="apro-btn apro-btn-sm apro-btn-danger" type="submit">🗑 Delete</button>
+                            </form>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="10" class="apro-center-muted">No BEAM/CAMFED records yet.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYMENTS -->
+          <div id="finance-payments" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">💳 Payments</h3>
+                <span class="apro-chip"><%= safeFinance?.payments?.length ?? 0 %> payments</span>
+              </div>
+
+              <form method="POST" action="/admin/finance/payments" class="apro-form-grid">
+                <input name="invoice_id" placeholder="Invoice ID (e.g 12)" required>
+                <input name="amount" type="number" step="0.01" placeholder="Amount Paid" required>
+
+                <select name="method">
+                  <option>Cash</option><option>Bank</option><option>EcoCash</option><option>Card</option>
+                </select>
+
+                <input name="reference" placeholder="Reference (optional)">
+                <input type="date" name="date" required>
+
+                <button class="apro-btn apro-btn-primary">💾 Save Payment</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Invoice</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.payments?.length) { safeFinance.payments.forEach(p => { %>
+                      <tr>
+                        <td class="td-strong">#<%= p.invoice_id %></td>
+                        <td>$<%= Number(p.amount || 0).toFixed(2) %></td>
+                        <td><span class="apro-pill"><%= p.payment_method %></span></td>
+                        <td><%= p.reference || "-" %></td>
+                        <td><%= p.paid_at ? String(p.paid_at).slice(0,10) : "-" %></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="5" class="apro-center-muted">No payments recorded.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- RECEIPTS -->
+          <div id="finance-receipts" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🧾 Payment Receipts</h3>
+                <span class="apro-chip"><%= safeFinance?.receipts?.length ?? 0 %> receipts</span>
+              </div>
+              <div class="apro-table-wrap">
+                <table class="data-table"><thead><tr><th>Receipt No</th><th>Student</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th><th>Action</th></tr></thead><tbody>
+                  <% if (safeFinance?.receipts?.length) { safeFinance.receipts.forEach(r => { %>
+                    <tr><td class="td-strong"><%= r.receipt_number %></td><td><%= r.unique_id %> — <%= r.first_name %> <%= r.last_name %></td><td>$<%= Number(r.amount || 0).toFixed(2) %></td><td><span class="apro-pill"><%= r.payment_method || '-' %></span></td><td><%= r.reference || '-' %></td><td><%= r.receipt_date ? String(r.receipt_date).slice(0,10) : '-' %></td><td><a class="apro-btn apro-btn-sm apro-btn-primary" target="_blank" href="/admin/finance/receipts/<%= r.id %>/print">🖨 Print</a></td></tr>
+                  <% }) } else { %><tr><td colspan="7" class="apro-center-muted">No receipts generated yet. Receipts are created automatically when a payment is recorded.</td></tr><% } %>
+                </tbody></table>
+              </div>
+            </div>
+          </div>
+
+          <!-- STUDENT LEDGER -->
+          <div id="finance-student-ledger" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head"><h3 class="apro-card-title">📒 Student Financial Ledger</h3><span class="apro-chip"><%= safeFinance?.studentLedger?.length ?? 0 %> entries</span></div>
+              <div class="apro-table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Student</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th><th>Reference</th></tr></thead><tbody>
+                <% if (safeFinance?.studentLedger?.length) { safeFinance.studentLedger.forEach(l => { %>
+                  <tr><td><%= l.transaction_date ? String(l.transaction_date).slice(0,10) : '-' %></td><td><%= l.unique_id %> — <%= l.first_name %> <%= l.last_name %></td><td><%= l.description || '-' %></td><td>$<%= Number(l.debit || 0).toFixed(2) %></td><td>$<%= Number(l.credit || 0).toFixed(2) %></td><td class="td-strong">$<%= Number(l.balance || 0).toFixed(2) %></td><td><%= l.reference_type || '-' %> #<%= l.reference_id || '-' %></td></tr>
+                <% }) } else { %><tr><td colspan="7" class="apro-center-muted">No ledger entries yet.</td></tr><% } %>
+              </tbody></table></div>
+            </div>
+          </div>
+
+          <!-- STATEMENTS -->
+          <div id="finance-statements" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head"><h3 class="apro-card-title">📑 Fee Statements</h3><span class="apro-chip"><%= safeFinance?.feeStatements?.length ?? 0 %> generated</span></div>
+              <form method="POST" action="/admin/finance/statements/generate" class="apro-form-grid">
+                <select name="student_id" required><option value="">Select Student</option><% if (safeStudents && safeStudents.length) { safeStudents.forEach(s => { %><option value="<%= s.id %>"><%= s.unique_id %> — <%= s.first_name %> <%= s.last_name %></option><% }) } %></select>
+                <input name="statement_period" placeholder="Period e.g. Term 1 2026" required><button class="apro-btn apro-btn-primary" type="submit">📑 Generate Statement Record</button>
+              </form>
+              <div class="apro-table-wrap" style="margin-top:12px;"><table class="data-table"><thead><tr><th>Student</th><th>Period</th><th>Generated At</th><th>File</th></tr></thead><tbody>
+                <% if (safeFinance?.feeStatements?.length) { safeFinance.feeStatements.forEach(st => { %><tr><td><%= st.unique_id %> — <%= st.first_name %> <%= st.last_name %></td><td><span class="apro-pill"><%= st.statement_period %></span></td><td><%= st.created_at ? String(st.created_at).slice(0,10) : '-' %></td><td><%= st.pdf_file || 'Pending PDF generation' %></td></tr><% }) } else { %><tr><td colspan="4" class="apro-center-muted">No statements generated yet.</td></tr><% } %>
+              </tbody></table></div>
+            </div>
+          </div>
+
+          <!-- CASHBOOK -->
+          <div id="finance-cashbook" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head"><h3 class="apro-card-title">🏦 Cashbook</h3><span class="apro-chip"><%= safeFinance?.cashbook?.length ?? 0 %> entries</span></div>
+              <form method="POST" action="/admin/finance/cashbook" class="apro-form-grid"><input type="date" name="transaction_date" required><input name="description" placeholder="Description" required><input type="number" step="0.01" name="inflow" placeholder="Inflow" value="0"><input type="number" step="0.01" name="outflow" placeholder="Outflow" value="0"><button class="apro-btn apro-btn-primary" type="submit">💾 Add Cashbook Entry</button></form>
+              <div class="apro-table-wrap" style="margin-top:12px;"><table class="data-table"><thead><tr><th>Date</th><th>Description</th><th>Inflow</th><th>Outflow</th><th>Balance</th></tr></thead><tbody>
+                <% if (safeFinance?.cashbook?.length) { safeFinance.cashbook.forEach(c => { %><tr><td><%= c.transaction_date ? String(c.transaction_date).slice(0,10) : '-' %></td><td><%= c.description || '-' %></td><td>$<%= Number(c.inflow || 0).toFixed(2) %></td><td>$<%= Number(c.outflow || 0).toFixed(2) %></td><td class="td-strong">$<%= Number(c.running_balance || 0).toFixed(2) %></td></tr><% }) } else { %><tr><td colspan="5" class="apro-center-muted">No cashbook entries yet.</td></tr><% } %>
+              </tbody></table></div>
+            </div>
+          </div>
+
+          <!-- BUDGETS -->
+          <div id="finance-budgets" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head"><h3 class="apro-card-title">🎯 Budget Management</h3><span class="apro-chip"><%= safeFinance?.budgets?.length ?? 0 %> budgets</span></div>
+              <form method="POST" action="/admin/finance/budgets" class="apro-form-grid"><input name="category" placeholder="Category e.g. Sports" required><input type="number" name="year" placeholder="Year e.g. 2026" required><input type="number" step="0.01" name="allocated_amount" placeholder="Allocated Amount" required><button class="apro-btn apro-btn-primary" type="submit">💾 Save Budget</button></form>
+              <div class="apro-table-wrap" style="margin-top:12px;"><table class="data-table"><thead><tr><th>Category</th><th>Year</th><th>Allocated</th><th>Spent</th><th>Remaining</th></tr></thead><tbody>
+                <% if (safeFinance?.budgets?.length) { safeFinance.budgets.forEach(b => { %><tr><td class="td-strong"><%= b.category %></td><td><%= b.year %></td><td>$<%= Number(b.allocated_amount || 0).toFixed(2) %></td><td>$<%= Number(b.spent_amount || 0).toFixed(2) %></td><td class="td-strong">$<%= Number(b.remaining_amount || 0).toFixed(2) %></td></tr><% }) } else { %><tr><td colspan="5" class="apro-center-muted">No budgets saved yet.</td></tr><% } %>
+              </tbody></table></div>
+            </div>
+          </div>
+
+          <!-- AUDIT TRAIL -->
+          <div id="finance-audit" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head"><h3 class="apro-card-title">🛡️ Finance Audit Trail</h3><span class="apro-chip"><%= safeFinance?.auditLogs?.length ?? 0 %> logs</span></div>
+              <div class="apro-table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>User</th><th>Action</th><th>Table</th><th>Record</th><th>Details</th></tr></thead><tbody>
+                <% if (safeFinance?.auditLogs?.length) { safeFinance.auditLogs.forEach(a => { %><tr><td><%= a.created_at ? String(a.created_at).slice(0,19).replace('T',' ') : '-' %></td><td><%= a.user_name || 'System' %></td><td><span class="apro-pill"><%= a.action || '-' %></span></td><td><%= a.table_name || '-' %></td><td>#<%= a.record_id || '-' %></td><td><%= a.new_values ? String(a.new_values).slice(0,80) : '-' %></td></tr><% }) } else { %><tr><td colspan="6" class="apro-center-muted">No audit logs yet.</td></tr><% } %>
+              </tbody></table></div>
+            </div>
+          </div>
+
+          <!-- SUPPLIERS -->
+          <div id="finance-suppliers" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🏭 Suppliers</h3>
+                <span class="apro-chip"><%= safeFinance?.suppliers?.length ?? 0 %> suppliers</span>
+              </div>
+
+              <form method="POST" action="/admin/finance/suppliers" class="apro-form-grid">
+                <input name="name" placeholder="Supplier Name" required>
+                <input name="phone" placeholder="Phone (optional)">
+                <input name="email" placeholder="Email (optional)">
+                <button class="apro-btn apro-btn-primary" type="submit">➕ Add Supplier</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Name</th><th>Phone</th><th>Email</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.suppliers?.length) { safeFinance.suppliers.forEach(s => { %>
+                      <tr>
+                        <td class="td-strong"><%= s.name %></td>
+                        <td><%= s.phone || "-" %></td>
+                        <td><%= s.email || "-" %></td>
+                        <td><span class="apro-badge apro-badge-ok"><%= s.status || "ACTIVE" %></span></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="4" class="apro-center-muted">No suppliers.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PURCHASES -->
+          <div id="finance-purchases" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">📦 Purchases</h3>
+                <span class="apro-chip"><%= safeFinance?.purchases?.length ?? 0 %> entries</span>
+              </div>
+
+              <p class="apro-hint" style="margin-top:6px;">
+                Inventory-style fields are packed into <b>Description</b> automatically.
+              </p>
+
+              <form method="POST" action="/admin/finance/purchases" class="apro-form-grid" id="purchase-form">
+                <select name="supplier_id" required>
+                  <option value="">Select Supplier</option>
+                  <% if (safeFinance?.suppliers?.length) { safeFinance.suppliers.forEach(s => { %>
+                    <option value="<%= s.id %>"><%= s.name %></option>
+                  <% }) } else { %>
+                    <option disabled>No suppliers</option>
+                  <% } %>
+                </select>
+
+                <select name="category" required>
+                  <option value="">Category</option>
+                  <% if (safeFinance?.purchaseCategories?.length) { safeFinance.purchaseCategories.forEach(c => { %>
+                    <option value="<%= c.name %>"><%= c.name %></option>
+                  <% }) } else { %>
+                    <option value="General">General</option>
+                  <% } %>
+                </select>
+
+                <input type="text" id="pur_item" placeholder="Item (e.g Sugar)" />
+                <input type="number" step="0.01" id="pur_qty" placeholder="Qty (e.g 10)" />
+                <input type="text" id="pur_unit" placeholder="Unit (e.g kg, pcs)" />
+                <input type="text" id="pur_store" placeholder="Store (e.g TM Pick n Pay)" />
+                <input type="text" id="pur_notes" placeholder="Notes (optional)" />
+
+                <input name="description" id="pur_description" placeholder="Description" style="display:none;" />
+
+                <input name="amount" type="number" step="0.01" placeholder="Total Amount" required>
+                <input type="date" name="purchase_date" required>
+
+                <button class="apro-btn apro-btn-primary" type="submit">💾 Add Purchase</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Date</th><th>Supplier</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.purchases?.length) { safeFinance.purchases.forEach(p => { %>
+                      <tr>
+                        <td><%= p.purchase_date ? String(p.purchase_date).slice(0,10) : "-" %></td>
+                        <td><%= p.supplier_name || "-" %></td>
+                        <td><span class="apro-pill"><%= p.category || "-" %></span></td>
+                        <td><%= p.description || "-" %></td>
+                        <td class="td-strong">$<%= Number(p.amount || 0).toFixed(2) %></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="5" class="apro-center-muted">No purchases recorded.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- EXPENSES -->
+          <div id="finance-expenses" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">📉 Expenses</h3>
+                <span class="apro-chip"><%= safeFinance?.expenses?.length ?? 0 %> entries</span>
+              </div>
+
+              <p class="apro-hint" style="margin-top:6px;">
+                Expense name/category is addable: type any name, or pick from suggestions.
+              </p>
+
+              <datalist id="expenseCategoryList">
+                <% if (safeFinance?.expenseCategories?.length) { safeFinance.expenseCategories.forEach(c => { %>
+                  <option value="<%= c.name %>"></option>
+                <% }) } %>
+              </datalist>
+
+              <form method="POST" action="/admin/finance/expenses" class="apro-form-grid">
+                <input name="category" list="expenseCategoryList" placeholder="Expense Name/Category (e.g Electricity)" required>
+                <input name="description" placeholder="Description (optional)">
+                <input name="amount" type="number" step="0.01" placeholder="Amount" required>
+                <input type="date" name="expense_date" required>
+                <button class="apro-btn apro-btn-danger" type="submit">💾 Add Expense</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+                  <tbody>
+                    <% if (safeFinance?.expenses?.length) { safeFinance.expenses.forEach(e => { %>
+                      <tr>
+                        <td><%= e.expense_date ? String(e.expense_date).slice(0,10) : "-" %></td>
+                        <td><span class="apro-pill"><%= e.category || "-" %></span></td>
+                        <td><%= e.description || "-" %></td>
+                        <td class="td-strong">$<%= Number(e.amount || 0).toFixed(2) %></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="4" class="apro-center-muted">No expenses recorded.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYSLIPS -->
+          <div id="finance-payslips" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🧑🏽‍🏫 Employee Payslips</h3>
+                <span class="apro-chip"><%= safeFinance?.payslips?.length ?? 0 %> slips</span>
+              </div>
+
+              <form method="POST" action="/admin/finance/payslips" class="apro-form-grid">
+                <select name="employee_id" required>
+                  <option value="">Select Employee</option>
+                  <% if (safeFinance?.employees?.length) { safeFinance.employees.forEach(emp => { %>
+                    <option value="<%= emp.id %>"><%= emp.first_name %> <%= emp.last_name %> — <%= emp.position %></option>
+                  <% }) } else { %>
+                    <option disabled>No employees found</option>
+                  <% } %>
+                </select>
+
+                <input name="basic_salary" placeholder="Basic Salary" required>
+                <input name="allowances" placeholder="Allowances (optional)">
+                <input name="deductions" placeholder="Deductions (optional)">
+                <input type="month" name="pay_month" required>
+
+                <button class="apro-btn apro-btn-primary">💾 Generate Payslip</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Employee</th><th>Month</th><th>Gross</th><th>Deductions</th><th>Net Pay</th><th>Action</th></tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.payslips?.length) { safeFinance.payslips.forEach(p => { %>
+                      <tr>
+                        <td><%= p.employee_name %></td>
+                        <td><span class="apro-pill"><%= p.pay_month %></span></td>
+                        <td>$<%= Number(p.gross_pay || 0).toFixed(2) %></td>
+                        <td>$<%= Number(p.deductions || 0).toFixed(2) %></td>
+                        <td class="td-strong">$<%= Number(p.net_pay || 0).toFixed(2) %></td>
+                        <td>
+                          <a href="/admin/finance/payslips/<%= p.id %>/print" target="_blank" class="apro-btn apro-btn-primary apro-btn-sm">🖨 Print</a>
+                        </td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="6" class="apro-center-muted">No payslips generated yet.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEDGER -->
+          <div id="finance-ledger" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">📘 Ledger</h3>
+                <span class="apro-chip"><%= safeFinance?.ledger?.length ?? 0 %> entries</span>
+              </div>
+
+              <div class="apro-table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+                  <tbody>
+                    <% if (safeFinance?.ledger?.length) { safeFinance.ledger.forEach(l => { %>
+                      <tr>
+                        <td><%= l.transaction_date ? String(l.transaction_date).slice(0,10) : "-" %></td>
+                        <td><span class="apro-pill"><%= l.type || "-" %></span></td>
+                        <td><%= l.category || "-" %></td>
+                        <td><%= l.description || "-" %></td>
+                        <td class="td-strong">$<%= Number(l.amount || 0).toFixed(2) %></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="5" class="apro-center-muted">Ledger empty.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMPLOYEES -->
+          <div id="finance-employees" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🧑 Employees</h3>
+                <span class="apro-chip"><%= safeFinance?.employees?.length ?? 0 %> staff</span>
+              </div>
+
+              <form method="POST" action="/admin/employees" class="apro-form-grid" id="add-employee-form">
+                <input name="first_name" placeholder="First Name" required>
+                <input name="last_name" placeholder="Last Name" required>
+                <input name="position" placeholder="Position" required>
+                <input name="department" placeholder="Department" required>
+                <input name="phone" placeholder="Phone (optional)">
+                <input name="email" placeholder="Email (optional)">
+                <input name="basic_salary" placeholder="Basic Salary" type="number" step="0.01" required>
+                <select name="status"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select>
+                <button class="apro-btn apro-btn-primary">💾 Add Employee</button>
+              </form>
+
+              <form method="POST" class="apro-form-grid" id="edit-employee-form" style="display:none;margin-top:10px;">
+                <input type="hidden" name="id">
+                <input name="first_name" placeholder="First Name" required>
+                <input name="last_name" placeholder="Last Name" required>
+                <input name="position" placeholder="Position" required>
+                <input name="department" placeholder="Department" required>
+                <input name="phone" placeholder="Phone (optional)">
+                <input name="email" placeholder="Email (optional)">
+                <input name="basic_salary" placeholder="Basic Salary" type="number" step="0.01" required>
+                <select name="status"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select>
+                <button class="apro-btn apro-btn-primary">💾 Save Changes</button>
+                <button type="button" class="apro-btn apro-btn-outline" onclick="cancelEdit()">✖ Cancel</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th><th>Position</th><th>Department</th><th>Phone</th>
+                      <th>Email</th><th>Salary</th><th>Status</th><th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (safeFinance?.employees?.length) { %>
+                      <% safeFinance.employees.forEach(emp => { %>
+                        <tr>
+                          <td class="td-strong"><%= emp.first_name || '' %> <%= emp.last_name || '' %></td>
+                          <td><%= emp.position || '-' %></td>
+                          <td><%= emp.department || '-' %></td>
+                          <td><%= emp.phone || '-' %></td>
+                          <td><%= emp.email || '-' %></td>
+                          <td>$<%= emp.basic_salary ? Number(emp.basic_salary).toFixed(2) : '0.00' %></td>
+                          <td><span class="apro-badge apro-badge-neutral"><%= emp.status || 'INACTIVE' %></span></td>
+                          <td style="white-space:nowrap;">
+                            <button type="button" class="apro-btn apro-btn-primary apro-btn-sm" onclick='startEdit(<%- JSON.stringify(emp) %>)'>✏️ Edit</button>
+                            <form method="POST" action="/admin/employees/<%= emp.id %>/delete" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                              <button class="apro-btn apro-btn-danger apro-btn-sm" type="submit">🗑 Delete</button>
+                            </form>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="8" class="apro-center-muted">No employees found.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ASSETS -->
+          <div id="finance-assets" class="finance-tab">
+            <div class="apro-card" style="margin-top:14px;">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">🏢 School Assets</h3>
+                <span class="apro-chip"><%= safeFinance?.assets?.length ?? 0 %> assets</span>
+              </div>
+
+              <form method="POST" action="/admin/finance/assets" class="apro-form-grid">
+                <input name="name" placeholder="Asset Name" required>
+                <select name="category">
+                  <option>Vehicle</option><option>Building</option><option>Equipment</option><option>Furniture</option>
+                </select>
+                <input name="purchase_value" type="number" step="0.01" placeholder="Value">
+                <input type="date" name="purchase_date">
+                <button class="apro-btn apro-btn-primary" type="submit">💾 Add Asset</button>
+              </form>
+
+              <div class="apro-table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                  <thead><tr><th>Name</th><th>Category</th><th>Purchase Value</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <% if (safeFinance?.assets?.length) { safeFinance.assets.forEach(a => { %>
+                      <tr>
+                        <td class="td-strong"><%= a.name %></td>
+                        <td><span class="apro-pill"><%= a.category %></span></td>
+                        <td>$<%= Number(a.purchase_value || 0).toFixed(2) %></td>
+                        <td><span class="apro-badge apro-badge-ok"><%= a.status || "ACTIVE" %></span></td>
+                      </tr>
+                    <% }) } else { %>
+                      <tr><td colspan="4" class="apro-center-muted">No assets recorded.</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= SYSTEM ================= -->
+        <section id="system" class="page-content">
+
+          <div class="apro-head">
+            <div>
+              <h2 class="apro-title">⚙️ System Settings</h2>
+              <p class="apro-subtitle">Manage configuration, school details and system health.</p>
+            </div>
+            <span class="apro-chip">Admin</span>
+          </div>
+
+          <div class="apro-card">
+            <div class="apro-card-head">
+              <h3 class="apro-card-title">Configuration</h3>
+              <span class="apro-chip">Tools</span>
+            </div>
+
+            <div class="apro-actions">
+              <button id="schoolSettingsBtn" class="apro-btn apro-btn-primary" type="button">🛠️ School Settings</button>
+              <button id="backupBtn" class="apro-btn" type="button">🔄 Backup & Restore</button>
+              <button id="maintenanceBtn" class="apro-btn apro-btn-danger" type="button">🚧 System Maintenance</button>
+            </div>
+          </div>
+
+          <div class="apro-grid-2" style="margin-top:14px;">
+
+            <div class="apro-card">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">School Information</h3>
+                <span class="apro-chip">Profile</span>
+              </div>
+
+              <div id="schoolInfo" class="apro-panel">
+                <!-- Dynamically loaded -->
+              </div>
+
+              <div class="apro-actions" style="margin-top:10px;">
+                <button class="apro-btn apro-btn-primary" type="button" onclick="openEditSchoolInfo()">✏️ Edit School Info</button>
+              </div>
+            </div>
+
+            <div class="apro-card">
+              <div class="apro-card-head">
+                <h3 class="apro-card-title">System Status</h3>
+                <span class="apro-chip">Health</span>
+              </div>
+
+              <div id="systemStatus" class="apro-panel">
+                <!-- Dynamically loaded -->
+              </div>
+
+              <div class="apro-actions" style="margin-top:10px;">
+                <button class="apro-btn" type="button" onclick="runMaintenance()">🛠 Run Maintenance</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- =========================
+     MOBILE OFFCANVAS SIDEBAR
+========================= -->
+<div class="offcanvas offcanvas-start portal-offcanvas" tabindex="-1" id="sidebarOffcanvasAdmin" aria-labelledby="sidebarOffcanvasAdminLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="sidebarOffcanvasAdminLabel">Menu</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <div class="mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <span style="font-size:1.4rem;">🏫</span>
+        <div>
+          <div class="fw-bold">Admin Portal</div>
+          <small class="opacity-75">School Management</small>
+        </div>
+      </div>
+    </div>
+
+    <nav class="portal-nav d-grid gap-2" aria-label="Mobile admin navigation">
+      <button type="button" class="btn nav-item active" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('dashboard')">
+        <span class="nav-ico">🏠</span><span>Dashboard</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('students')">
+        <span class="nav-ico">👥</span><span>Students</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('teachers')">
+        <span class="nav-ico">👨‍🏫</span><span>Teachers</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('classes')">
+        <span class="nav-ico">📚</span><span>Classes</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('subjects')">
+        <span class="nav-ico">📘</span><span>Subjects</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('fees')">
+        <span class="nav-ico">💰</span><span>Fees</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('library')">
+        <span class="nav-ico">🏛️</span><span>Library</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('notices')">
+        <span class="nav-ico">📢</span><span>Notices</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('reports')">
+        <span class="nav-ico">📈</span><span>Reports</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('finance')">
+        <span class="nav-ico">💼</span><span>Finance</span>
+      </button>
+
+      <button type="button" class="btn nav-item" data-bs-dismiss="offcanvas" onclick="setActiveAdmin(this); showPage('system')">
+        <span class="nav-ico">⚙️</span><span>System</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<!-- =========================
+     MODALS (UNCHANGED CONTENT)
+     (kept exactly as you provided, except:
+      - removed the duplicated assignStudentModal (you had it twice)
+     )
+========================= -->
+
+<!-- ADD STUDENT MODAL -->
+<div id="addStudentModal" class="modal">
+  <form method="POST" action="/admin/students/add" class="modal-box">
+    <h3>➕ Add New Student</h3>
+
+    <input name="first_name" placeholder="First Name" required>
+    <input name="last_name" placeholder="Last Name" required>
+
+    <input name="email" placeholder="School Email" required>
+    <input name="phone" placeholder="Phone">
+
+    <label style="font-size:12px;color:#666;margin-top:6px;">Date of Birth</label>
+    <input name="date_of_birth" type="date" required>
+
+    <input name="birth_id_number" placeholder="Birth Entry / National ID" required>
+
+    <select name="form_level" required>
+      <option value="">Select GRADE / Form</option>
+      <optgroup label="Primary School">
+        <option value="ECD A">ECD A</option>
+        <option value="ECD B">ECD B</option>
+        <option value="GRADE 1">GRADE 1</option>
+        <option value="GRADE 2">GRADE 2</option>
+        <option value="GRADE 3">GRADE 3</option>
+        <option value="GRADE 4">GRADE 4</option>
+        <option value="GRADE 5">GRADE 5</option>
+        <option value="GRADE 6">GRADE 6</option>
+        <option value="GRADE 7">GRADE 7</option>
+      </optgroup>
+      <optgroup label="Secondary School">
+        <option value="Form 1">Form 1</option>
+        <option value="Form 2">Form 2</option>
+        <option value="Form 3">Form 3</option>
+        <option value="Form 4">Form 4</option>
+        <option value="Form 5">Form 5</option>
+        <option value="Form 6">Form 6</option>
+      </optgroup>
+    </select>
+
+    <select name="status" required>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <small style="color:#555">Registration Number will be auto-generated by the system.</small>
+
+    <div class="modal-actions">
+      <button type="submit">Save Student</button>
+      <button type="button" onclick="closeAddStudent()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="studentExistsModal" class="modal">
+  <div class="modal-box">
+    <h3>Student already exists</h3>
+    <p>A student with the same first name and last name is already registered. Check the existing student record before adding another one.</p>
+
+    <div class="modal-actions">
+      <button type="button" onclick="closeStudentExistsModal()">OK</button>
+      <button type="button" onclick="closeStudentExistsModal(); openAddStudent();">Review Entry</button>
+    </div>
+  </div>
+</div>
+
+<div id="editStudentModal" class="modal">
+  <form method="POST" action="/admin/students/edit" class="modal-box">
+    <h3>✏️ Edit Student</h3>
+
+    <input type="hidden" name="id" id="edit_id">
+
+    <input name="first_name" id="edit_first_name" placeholder="First Name" required>
+    <input name="last_name" id="edit_last_name" placeholder="Last Name" required>
+
+    <input name="email" id="edit_email" placeholder="School Email" required>
+    <input name="phone" id="edit_phone" placeholder="Phone">
+
+    <label style="font-size:12px;color:#666;margin-top:6px;">Date of Birth</label>
+    <input name="date_of_birth" id="edit_date_of_birth" type="date" required>
+
+    <input name="birth_id_number" id="edit_birth_id_number" placeholder="Birth Entry / National ID" required>
+
+    <select name="form_level" id="edit_form_level" required>
+      <option value="">Select GRADE / Form</option>
+      <optgroup label="Primary School">
+        <option value="ECD A">ECD A</option>
+        <option value="ECD B">ECD B</option>
+        <option value="GRADE 1">GRADE 1</option>
+        <option value="GRADE 2">GRADE 2</option>
+        <option value="GRADE 3">GRADE 3</option>
+        <option value="GRADE 4">GRADE 4</option>
+        <option value="GRADE 5">GRADE 5</option>
+        <option value="GRADE 6">GRADE 6</option>
+        <option value="GRADE 7">GRADE 7</option>
+      </optgroup>
+      <optgroup label="Secondary School">
+        <option value="Form 1">Form 1</option>
+        <option value="Form 2">Form 2</option>
+        <option value="Form 3">Form 3</option>
+        <option value="Form 4">Form 4</option>
+        <option value="Form 5">Form 5</option>
+        <option value="Form 6">Form 6</option>
+      </optgroup>
+    </select>
+
+    <select name="status" id="edit_status" required>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Save Changes</button>
+      <button type="button" onclick="closeEditStudent()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ADD TEACHER MODAL -->
+<div id="addTeacherModal" class="modal">
+  <form method="POST" action="/admin/teachers/add" class="modal-box">
+    <h3>➕ Add Teacher</h3>
+
+    <input name="first_name" placeholder="First Name" required>
+    <input name="last_name" placeholder="Last Name" required>
+    <input name="email" placeholder="Email" required>
+
+    <input name="employee_number" placeholder="National ID / Employee Number" required>
+    <label style="font-size:12px;color:#666;margin-top:6px;">Appointment Date</label>
+    <input type="date" name="date_of_appointment" required>
+
+    <select name="department" required>
+      <option value="">Select Department</option>
+      <option value="Mathematics">Mathematics</option>
+      <option value="Sciences">Sciences</option>
+      <option value="Languages">Languages</option>
+      <option value="Humanities">Humanities</option>
+      <option value="Infancy">Infancy</option>
+      <option value="Junior">Junior</option>
+      <option value="ICT">ICT</option>
+    </select>
+
+    <select name="status" required>
+      <option value="active">Active</option>
+      <option value="leave">On Leave</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Save Teacher</button>
+      <button type="button" class="btn-sm danger" onclick="closeAddTeacher()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="editTeacherModal" class="modal">
+  <form method="POST" action="/admin/teachers/edit" class="modal-box">
+    <h3>✏️ Edit Teacher</h3>
+
+    <input type="hidden" name="id" id="edit_teacher_id">
+
+    <input name="first_name" id="edit_teacher_first_name" required>
+    <input name="last_name" id="edit_teacher_last_name" required>
+    <input name="email" id="edit_teacher_email" required>
+
+    <input name="employee_number" id="edit_teacher_employee_number" placeholder="National ID / Employee Number" required>
+    <label style="font-size:12px;color:#666;margin-top:6px;">Appointment Date</label>
+    <input type="date" name="date_of_appointment" id="edit_teacher_date_of_appointment" required>
+
+    <select name="department" id="edit_teacher_department" required>
+      <option value="Mathematics">Mathematics</option>
+      <option value="Sciences">Sciences</option>
+      <option value="Languages">Languages</option>
+      <option value="Humanities">Humanities</option>
+      <option value="Infancy">Infancy</option>
+      <option value="Junior">Junior</option>
+      <option value="ICT">ICT</option>
+    </select>
+
+    <select name="status" id="edit_teacher_status" required>
+      <option value="active">Active</option>
+      <option value="leave">On Leave</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <small style="color:#666">Teacher ID cannot be changed after creation.</small>
+
+    <div class="modal-actions">
+      <button type="submit">Save Changes</button>
+      <button type="button" onclick="closeEditTeacher()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="addClassModal" class="modal">
+  <form method="POST" action="/admin/classes/add" class="modal-box">
+    <h3>➕ Create Class</h3>
+    <input name="name" placeholder="Class Name (e.g Form 1A)" required>
+    <select name="form_level" required>
+      <option value="">Select GRADE / Form</option>
+
+      <optgroup label="Primary School">
+        <option value="ECD A">ECD A</option>
+        <option value="ECD B">ECD B</option>
+        <option value="GRADE 1">GRADE 1</option>
+        <option value="GRADE 2">GRADE 2</option>
+        <option value="GRADE 3">GRADE 3</option>
+        <option value="GRADE 4">GRADE 4</option>
+        <option value="GRADE 5">GRADE 5</option>
+        <option value="GRADE 6">GRADE 6</option>
+        <option value="GRADE 7">GRADE 7</option>
+      </optgroup>
+
+      <optgroup label="Secondary School">
+        <option value="Form 1">Form 1</option>
+        <option value="Form 2">Form 2</option>
+        <option value="Form 3">Form 3</option>
+        <option value="Form 4">Form 4</option>
+        <option value="Form 5">Form 5</option>
+        <option value="Form 6">Form 6</option>
+      </optgroup>
+    </select>
+
+    <input name="room" placeholder="Room (e.g Room 101)">
+    <div class="modal-actions">
+      <button type="submit">Save Class</button>
+      <button type="button" onclick="closeAddClass()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="editClassModal" class="modal">
+  <form method="POST" action="/admin/classes/edit" class="modal-box">
+    <h3>✏️ Edit Class</h3>
+    <input type="hidden" name="id" id="edit_class_id">
+    <input name="name" id="edit_class_name" placeholder="Class Name" required>
+    <input name="form_level" id="edit_class_form_level" placeholder="Form Level" required>
+    <input name="room" id="edit_class_room" placeholder="Room">
+    <div class="modal-actions">
+      <button type="submit">Save Changes</button>
+      <button type="button" onclick="closeEditClass()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="importStudentsModal" class="modal">
+  <form method="POST"
+        action="/admin/students/import"
+        enctype="multipart/form-data"
+        class="modal-box">
+
+    <h3>📥 Import Students</h3>
+
+    <p style="font-size:13px;color:#666;">
+      CSV columns must be exactly:<br>
+      <b>Reg No, First Name, Last Name, Form, Email, Phone, Status</b>
+    </p>
+
+    <input type="file"
+           name="students_file"
+           accept=".csv"
+           required>
+
+    <div class="modal-actions">
+      <button type="submit">Import</button>
+      <button type="button" onclick="closeImportStudents()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="assignTeacherModal" class="modal">
+  <form method="POST" action="/admin/classes/assign-teacher" class="modal-box">
+    <h3>👨‍🏫 Assign Teachers</h3>
+
+    <div class="form-group">
+      <label for="assignClassSelect">Select Class:</label>
+      <select id="assignClassSelect" name="class_id" required>
+        <option value="">-- Select Class --</option>
+        <% safeClassesList.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.name %> (<%= c.class_code %>)</option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="assignTeachersSelect">Select Teacher(s):</label>
+      <select id="assignTeachersSelect" name="teacher_ids[]" multiple required size="6">
+        <% safeTeachersList.forEach(t => { %>
+          <option value="<%= t.id %>"><%= t.first_name %> <%= t.last_name %></option>
+        <% }) %>
+      </select>
+      <small>Hold Ctrl (Cmd on Mac) to select multiple teachers</small>
+    </div>
+
+    <div class="modal-actions">
+      <button type="submit" class="btn-primary">Assign</button>
+      <button type="button" class="btn-secondary" onclick="closeModal('assignTeacherModal')">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="deassignTeacherModal" class="modal">
+  <form method="POST" action="/admin/classes/deassign-teacher" class="modal-box">
+    <h3>❌ Deassign Teachers</h3>
+
+    <div class="form-group">
+      <label>Select Class:</label>
+      <select name="class_id" required onchange="loadAssignedTeachersForDeassign(this.value)">
+        <option value="">-- Select Class --</option>
+        <% safeClassesList.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.name %> (<%= c.class_code %>)</option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div id="deassignTeachersContainer">
+      <!-- Assigned teachers checkboxes will appear here -->
+    </div>
+
+    <div class="modal-actions">
+      <button type="submit" class="btn-danger">Deassign Selected</button>
+      <button type="button" class="btn-secondary" onclick="closeTeacherModal('deassignTeacherModal')">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="manageSubjectsModal" class="modal">
+  <form method="POST" action="/admin/classes/manage-subjects" class="modal-box">
+    <h3>📘 Manage Subjects</h3>
+
+    <select name="class_id" required>
+      <option value="">Select Class</option>
+      <% safeClassesList.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %> (<%= c.class_code %>)</option>
+      <% }) %>
+    </select>
+
+    <textarea name="subjects" placeholder="Enter subjects comma separated (e.g Math, English)" required></textarea>
+
+    <div class="modal-actions">
+      <button type="submit">Save Subjects</button>
+      <button type="button" onclick="closeManageSubjects()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="assignStudentModal" class="modal">
+  <form method="POST" action="/admin/classes/assign-student" class="modal-box">
+    <h3>👨‍🎓 Assign Students to Class</h3>
+
+    <select name="class_id" required>
+      <option value="">Select Class</option>
+      <% safeClassesList.forEach(c => { %>
+        <option value="<%= c.id %>">
+          <%= c.name %> (<%= c.class_code %>)
+        </option>
+      <% }) %>
+    </select>
+
+    <label>Select Unassigned Students</label>
+
+    <select name="student_ids[]" multiple size="10" required>
+      <% 
+        const unassignedStudents = safeStudents.filter(s => !s.class_id);
+      %>
+
+      <% if (unassignedStudents.length === 0) { %>
+        <option disabled>No unassigned students available</option>
+      <% } else { %>
+        <% unassignedStudents.forEach(s => { %>
+          <option value="<%= s.id %>">
+            <%= s.first_name %> <%= s.last_name %> 
+            (<%= s.unique_id %>) - <%= s.form_level %>
+          </option>
+        <% }) %>
+      <% } %>
+    </select>
+
+    <small>Hold CTRL to select more than one student.</small>
+
+    <div class="modal-actions">
+      <button type="submit">Assign Selected Students</button>
+      <button type="button" onclick="closeAssignStudent()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="addSubjectModal" class="modal">
+  <form method="POST" action="/admin/subjects/add" class="modal-box">
+    <h3>➕ Add Subject</h3>
+
+    <input name="name" placeholder="Subject Name" required>
+
+    <!-- NOTE: This is your original hidden default; keep if your backend expects it -->
+    <input type="hidden" name="class_id" value="1">
+
+    <div class="modal-actions">
+      <button type="submit">Save</button>
+      <button type="button" onclick="closeAddSubject()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="editSubjectModal" class="modal">
+  <form method="POST" action="/admin/subjects/edit" class="modal-box">
+    <h3>✏️ Edit Subject</h3>
+
+    <input type="hidden" name="id" id="edit_subject_id">
+    <input name="name" id="edit_subject_name" required>
+
+    <div class="modal-actions">
+      <button type="submit">Save</button>
+      <button type="button" onclick="closeEditSubject()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- VIEW CLASS STUDENTS MODAL -->
+<div id="viewStudentsModal" class="modal">
+
+  <div class="modal-box" style="width:95%;max-width:1200px;">
+
+    <h3 id="viewStudentsTitle">
+      👨‍🎓 Class Students
+    </h3>
+
+    <div class="apro-table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+
+        
+          <tr>
+        
+            <th>#</th>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>Form</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Action</th>
+            <th>Status</th>
+        
+          </tr>
+        
+        </thead>
+        
+        <tbody id="classStudentsBody">
+        
+          <tr>
+        
+            <td colspan="8" class="apro-center-muted">
+              Loading students...
+            </td>
+        
+          </tr>
+        
+        </tbody>
+
+          <tr>
+            <td colspan="8" class="apro-center-muted">
+              Loading students...
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" onclick="closeViewStudents()">
+        Close
+      </button>
+    </div>
+
+  </div>
+
+</div>
+<div id="assignSubjectsModal" class="modal">
+  <form method="POST" action="/admin/classes/assign-subjects" class="modal-box">
+    <h3>📘 Assign Subjects to Class</h3>
+
+    <select name="class_id" required>
+      <% safeClassesList.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %></option>
+      <% }) %>
+    </select>
+
+    <select name="subject_ids[]" multiple size="6">
+      <% safeSubjects.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Save</button>
+      <button type="button" onclick="closeAssignSubjects()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- SET FEE STRUCTURE MODAL -->
+<div id="feeStructureModal" class="modal">
+  <form method="POST" action="/admin/fees/structure/save" class="modal-box">
+    <h3>💰 Set Fee Structure</h3>
+
+    <select name="form_level" required>
+      <option value="">Select Level</option>
+      <option>GRADE 1</option>
+      <option>GRADE 2</option>
+      <option>GRADE 3</option>
+      <option>GRADE 4</option>
+      <option>GRADE 5</option>
+      <option>GRADE 6</option>
+      <option>GRADE 7</option>
+      <option>-----</option>
+      <option>Form 1</option>
+      <option>Form 2</option>
+      <option>Form 3</option>
+      <option>Form 4</option>
+      <option>Form 5</option>
+      <option>Form 6</option>
+    </select>
+
+    <input name="term_fee" placeholder="Term Fee (e.g 450)" required>
+    <input name="annual_fee" placeholder="Annual Fee (e.g 1350)" required>
+
+    <div class="modal-actions">
+      <button type="submit">Save Fee</button>
+      <button type="button" onclick="closeFeeStructure()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- RECORD PAYMENT MODAL -->
+<div id="paymentModal" class="modal">
+  <form method="POST" action="/admin/fees/pay" class="modal-box">
+    <h3>💳 Record Fee Payment</h3>
+
+    <select name="student_id" required>
+      <option value="">Select Student (Reg Number)</option>
+      <% safeStudents.forEach(s => { %>
+        <option value="<%= s.id %>">
+          <%= s.unique_id %> - <%= s.first_name %> <%= s.last_name %>
+        </option>
+      <% }) %>
+    </select>
+
+    <input name="amount" placeholder="Total Fee Amount" required>
+    <input name="paid" placeholder="Amount Paid" required>
+
+    <select name="method" required>
+      <option value="">Payment Method</option>
+      <option value="Cash">Cash</option>
+      <option value="Bank Transfer">Bank Transfer</option>
+      <option value="Mobile Money">Mobile Money</option>
+    </select>
+
+    <input name="reference" placeholder="Receipt / Reference Number" required>
+    <input type="date" name="date_paid" required>
+
+    <div class="modal-actions">
+      <button type="submit">Record Payment</button>
+      <button type="button" onclick="closePaymentModal()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- FEES REPORT MODAL -->
+<div id="feeReportModal" class="modal">
+  <form method="GET" action="/admin/fees/reports" class="modal-box">
+    <h3>📊 Fees Report</h3>
+
+    <select name="type" required>
+      <option value="">Report Type</option>
+      <option value="student">Per Student</option>
+      <option value="form">Per Form</option>
+    </select>
+
+    <select name="student_id">
+      <option value="">Select Student (optional)</option>
+      <% safeStudents.forEach(s => { %>
+        <option value="<%= s.id %>">
+          <%= s.unique_id %> - <%= s.first_name %> <%= s.last_name %>
+        </option>
+      <% }) %>
+    </select>
+
+    <select name="form_level">
+      <option value="">Select Form (optional)</option>
+      <option>GRADE 1</option>
+      <option>GRADE 2</option>
+      <option>GRADE 3</option>
+      <option>GRADE 4</option>
+      <option>GRADE 5</option>
+      <option>GRADE 6</option>
+      <option>GRADE 7</option>
+      <option>-----</option>
+      <option>Form 1</option>
+      <option>Form 2</option>
+      <option>Form 3</option>
+      <option>Form 4</option>
+      <option>Form 5</option>
+      <option>Form 6</option>
+    </select>
+
+    <select name="period" required>
+      <option value="">Time Period</option>
+      <option value="term">Per Term</option>
+      <option value="month">Per Month</option>
+      <option value="year">Per Year</option>
+      <option value="custom">Custom Range</option>
+    </select>
+
+    <input type="date" name="start_date">
+    <input type="date" name="end_date">
+
+    <div class="modal-actions">
+      <button type="submit">Generate Report</button>
+      <button type="button" onclick="closeFeeReport()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- EDIT FEE STRUCTURE MODAL -->
+<div id="editFeeModal" class="modal">
+  <form method="POST" action="/admin/fees/structure/update" class="modal-box">
+    <h3>✏️ Edit Fee Structure</h3>
+
+    <input type="hidden" name="id" id="edit_fee_id">
+
+    <input name="form_level" id="edit_form_level" readonly>
+
+    <input name="term_fee" id="edit_term_fee" required>
+    <input name="annual_fee" id="edit_annual_fee" required>
+
+    <div class="modal-actions">
+      <button type="submit">Update Fee</button>
+      <button type="button" onclick="closeEditFee()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ADD RESOURCE MODAL -->
+<div id="addResourceModal" class="modal">
+  <form class="modal-box"
+        method="POST"
+        action="/admin/library/add"
+        enctype="multipart/form-data">
+
+    <h3>➕ Add Library Resource</h3>
+
+    <input name="title" placeholder="Resource Title" required>
+    <input name="author" placeholder="Author / Publisher" required>
+
+    <select name="subject_id" required>
+      <option value="">Select Subject</option>
+      <% safeSubjects.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    </select>
+
+    <input type="file" name="resource_file" accept=".pdf,.docx,.xlsx,.pptx" required>
+
+    <small style="color:#666;">Allowed formats: PDF, DOCX, XLSX, PPTX</small>
+
+    <div class="modal-actions">
+      <button type="submit">Save Resource</button>
+      <button type="button" onclick="closeAddResource()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ADD DIGITAL RESOURCE MODAL -->
+<div id="addDigitalModal" class="modal">
+  <form class="modal-box" onsubmit="saveDigital(event)">
+    <h3>💾 Add Digital Resource</h3>
+
+    <input name="title" placeholder="Resource Title" required>
+    <input name="author" placeholder="Author / Publisher" required>
+    <input name="category" placeholder="Category" required>
+
+    <div class="modal-actions">
+      <button type="submit">Save Resource</button>
+      <button type="button" onclick="closeAddDigital()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- EDIT RESOURCE MODAL -->
+<div id="editLibraryModal" class="modal">
+  <form class="modal-box" onsubmit="updateBook(event)">
+    <h3>✏️ Edit Resource</h3>
+
+    <input type="hidden" name="id">
+
+    <input name="title" required>
+    <input name="author" required>
+    <input name="category" required>
+
+    <select name="available">
+      <option value="1">Available</option>
+      <option value="0">Borrowed</option>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Update</button>
+      <button type="button" onclick="closeEditLibrary()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- BORROW / RETURN MODAL -->
+<div id="borrowModal" class="modal">
+  <form class="modal-box" onsubmit="borrowBook(event)">
+    <h3>🔄 Borrow Book</h3>
+
+    <select name="student_id" required>
+      <option value="">Select Student</option>
+      <% safeStudents.forEach(s => { %>
+        <option value="<%= s.id %>">
+          <%= s.reg_no %> - <%= s.first_name %> <%= s.last_name %>
+        </option>
+      <% }) %>
+    </select>
+
+    <select name="book_id" required>
+      <option value="">Select Book</option>
+      <% /* loaded dynamically */ %>
+    </select>
+
+    <input type="date" name="due_date" required>
+
+    <div class="modal-actions">
+      <button type="submit">Borrow</button>
+      <button type="button" onclick="closeBorrowManager()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ADD NOTICE MODAL -->
+<div id="addNoticeModal" class="modal">
+  <form class="modal-box" onsubmit="saveNotice(event)">
+    <h3>📢 Publish Notice</h3>
+
+    <input name="title" placeholder="Notice Title" required>
+
+    <textarea name="message" placeholder="Notice Message" required></textarea>
+
+    <select name="category" required>
+      <option value="">Select Category</option>
+      <option>General</option>
+      <option>Academic</option>
+      <option>Events</option>
+      <option>Examinations</option>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Publish</button>
+      <button type="button" onclick="closeAddNotice()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- EDIT NOTICE MODAL -->
+<div id="editNoticeModal" class="modal">
+  <form class="modal-box" onsubmit="updateNotice(event)">
+    <h3>✏️ Edit Notice</h3>
+
+    <input type="hidden" name="id">
+
+    <input name="title" required>
+    <textarea name="message" required></textarea>
+
+    <select name="category" required>
+      <option>General</option>
+      <option>Academic</option>
+      <option>Events</option>
+      <option>Examinations</option>
+    </select>
+
+    <div class="modal-actions">
+      <button type="submit">Update</button>
+      <button type="button" onclick="closeEditNotice()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- SCHEDULE NOTICE MODAL -->
+<div id="scheduleNoticeModal" class="modal">
+  <form class="modal-box" onsubmit="scheduleNotice(event)">
+    <h3>⏰ Schedule Notice</h3>
+
+    <input name="title" placeholder="Notice Title" required>
+
+    <textarea name="message" placeholder="Notice Message" required></textarea>
+
+    <select name="category" required>
+      <option>General</option>
+      <option>Academic</option>
+      <option>Events</option>
+      <option>Examinations</option>
+    </select>
+
+    <select name="visibility" required>
+      <option value="ALL">Visible to Everyone</option>
+      <option value="STUDENTS">Students Only</option>
+      <option value="TEACHERS">Teachers Only</option>
+      <option value="ADMIN">Admins Only</option>
+    </select>
+
+    <input type="datetime-local" name="publish_at" required>
+
+    <div class="modal-actions">
+      <button type="submit">Schedule</button>
+      <button type="button" onclick="closeScheduleNotice()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<div id="schoolModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>✏️ Edit School Info</h3>
+
+    <input id="schName" placeholder="School Name" />
+    <input id="schAddress" placeholder="Address" />
+    <input id="schPhone" placeholder="Phone" />
+    <input id="schEmail" placeholder="Email" />
+
+    <div style="margin-top:15px;">
+      <button class="btn-primary" onclick="saveSchoolInfo()">Save</button>
+      <button class="btn-danger" onclick="closeSchoolInfo()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="userManagementModal" class="modal">
+  <div class="modal-box">
+    <h3>👨🏻‍💻 User Management</h3>
+
+    <button class="btn-primary" onclick="openAddUser()">➕ Add New User</button>
+
+    <table class="data-table" id="usersTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loaded dynamically -->
+      </tbody>
+    </table>
+
+    <div class="modal-actions">
+      <button type="button" onclick="closeUserManagement()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="backupModal" class="modal">
+  <div class="modal-box">
+    <h3>🔄 Backup & Restore</h3>
+
+    <button class="btn-warning" onclick="runBackup()">💾 Run Backup</button>
+
+    <h4 style="margin-top:10px;">Previous Backups</h4>
+    <ul id="backupList"></ul>
+
+    <div class="modal-actions">
+      <button type="button" onclick="closeBackupModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Your existing JS -->
+<script src="/script.js?v=2"></script>
+
+<script>
+  // -----------------------
+  // Active nav sync (desktop + mobile)
+  // -----------------------
+  function setActiveAdmin(btn){
+    document.querySelectorAll('.portal-nav .nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const text = btn.innerText.trim();
+    document.querySelectorAll('.portal-nav .nav-item').forEach(b => {
+      if (b.innerText.trim() === text) b.classList.add('active');
+    });
+  }
+
+  // -----------------------
+  // Finance helpers (your original logic preserved)
+  // -----------------------
+  function showFinanceTab(tabId) {
+    document.querySelectorAll('#finance .finance-tab').forEach(t => t.classList.remove('active'));
+    const el = document.getElementById(tabId);
+    if (el) el.classList.add('active');
+  }
+
+  function toggleInvoiceScope() {
+    const scope = document.getElementById('invoiceScope')?.value || 'single';
+    const studentSel = document.getElementById('invoiceStudent');
+    const levelSel = document.getElementById('invoiceLevel');
+
+    if (!studentSel || !levelSel) return;
+
+    if (scope === 'single') {
+      studentSel.style.display = '';
+      studentSel.required = true;
+      levelSel.style.display = 'none';
+      levelSel.required = false;
+    } else if (scope === 'level') {
+      studentSel.style.display = 'none';
+      studentSel.required = false;
+      levelSel.style.display = '';
+      levelSel.required = true;
+    } else { // all
+      studentSel.style.display = 'none';
+      studentSel.required = false;
+      levelSel.style.display = 'none';
+      levelSel.required = false;
+    }
+  }
+  toggleInvoiceScope();
+
+  (function () {
+    const form = document.getElementById('invoice-form');
+    if (!form) return;
+
+    const msg = document.getElementById('invoiceBulkMsg');
+    const btn = document.getElementById('invoiceSubmitBtn');
+
+    const students = <%- JSON.stringify(safeStudents || []) %>;
+
+    form.addEventListener('submit', async function (e) {
+      const scope = document.getElementById('invoiceScope')?.value || 'single';
+      return;
+
+      e.preventDefault();
+
+      const term = form.querySelector('[name="term"]').value;
+      const year = form.querySelector('[name="year"]').value;
+      const total_amount = form.querySelector('[name="total_amount"]').value;
+      const level = document.getElementById('invoiceLevel')?.value || '';
+
+      let targets = [];
+      if (scope === 'all') {
+        targets = students;
+      } else if (scope === 'level') {
+        targets = students.filter(s => String(s.form_level || '').toLowerCase() === String(level).toLowerCase());
+      }
+
+      if (!targets.length) {
+        if (msg) {
+          msg.style.display = '';
+          msg.style.color = '#b45309';
+          msg.textContent = 'No students found for the selected scope.';
+        }
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      if (msg) {
+        msg.style.display = '';
+        msg.style.color = '#555';
+        msg.textContent = `Creating invoices... 0/${targets.length}`;
+      }
+
+      const postOne = async (student_id) => {
+        const body = new URLSearchParams({ student_id, term, year, total_amount });
+        const res = await fetch('/admin/finance/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        });
+        return res.ok;
+      };
+
+      let ok = 0;
+      for (let i = 0; i < targets.length; i++) {
+        try {
+          const success = await postOne(String(targets[i].id));
+          if (success) ok++;
+        } catch (_) {}
+
+        if (msg) msg.textContent = `Creating invoices... ${i + 1}/${targets.length}`;
+      }
+
+      if (msg) {
+        msg.style.color = ok === targets.length ? '#166534' : '#b45309';
+        msg.textContent = `Done: ${ok}/${targets.length} invoices created. Reloading...`;
+      }
+
+      setTimeout(() => {
+        window.location.href = '/admin#finance';
+        window.location.reload();
+      }, 700);
+    });
+  })();
+
+  (function () {
+    const form = document.getElementById('purchase-form');
+    if (!form) return;
+
+    form.addEventListener('submit', function () {
+      const item = (document.getElementById('pur_item')?.value || '').trim();
+      const qty  = (document.getElementById('pur_qty')?.value || '').trim();
+      const unit = (document.getElementById('pur_unit')?.value || '').trim();
+      const store= (document.getElementById('pur_store')?.value || '').trim();
+      const notes= (document.getElementById('pur_notes')?.value || '').trim();
+
+      const parts = [];
+      if (item) parts.push(`Item: ${item}`);
+      if (qty || unit) parts.push(`Qty: ${qty || '-'} ${unit || ''}`.trim());
+      if (store) parts.push(`Store: ${store}`);
+      if (notes) parts.push(`Notes: ${notes}`);
+
+      const packed = parts.join(' | ') || notes || item || 'Purchase';
+      const desc = document.getElementById('pur_description');
+      if (desc) desc.value = packed;
+    });
+  })();
+  
+
+    async function loadStudentForEdit(id) {
+      try {
+        const res = await fetch(`/admin/students/${id}/json`);
+        if (!res.ok) throw new Error("Failed to load student");
+    
+        const s = await res.json();
+        openEditStudent(s);
+      } catch (err) {
+        alert("Could not open student for editing.");
+        console.error(err);
+      }
+    }
+
+</script>
+<!-- ================= IMPORT TEACHERS MODAL ================= -->
+
+<div
+  id="importTeachersModal"
+  class="apro-modal-overlay"
+  style="display:none;"
+>
+
+  <div class="apro-modal">
+
+    <div class="apro-modal-header">
+      <h3>📥 Import Teachers</h3>
+
+      <button
+        type="button"
+        class="apro-close-btn"
+        onclick="closeImportTeachers()"
+      >
+        ✖
+      </button>
+    </div>
+
+    <form
+      action="/admin/teachers/import"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+
+      <div class="apro-form-group">
+        <label>Select CSV File</label>
+
+        <input
+          type="file"
+          name="teachers_file"
+          accept=".csv"
+          required
+        >
+      </div>
+
+      <div class="apro-modal-actions">
+
+        <button
+          type="submit"
+          class="apro-btn apro-btn-primary"
+        >
+          📥 Import Teachers
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+</body>
+</html>

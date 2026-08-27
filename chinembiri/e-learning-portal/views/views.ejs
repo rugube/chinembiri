@@ -1,0 +1,1176 @@
+<% const isAdminLogin = typeof authMode !== "undefined" && authMode === "admin"; %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, follow" />
+
+  <title>Chinembiri Primary School, Chitungwiza | Login Portal</title>
+
+  <link rel="icon" href="/uploads/images/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/uploads/images/logo.png" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green: #0f766e;
+      --green-dark: #064e3b;
+      --green-deep: #022c22;
+      --teal: #14b8a6;
+      --gold: #facc15;
+      --orange: #f59e0b;
+      --white: #ffffff;
+      --cream: #f8fafc;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --shadow: 0 30px 90px rgba(15, 23, 42, 0.20);
+      --soft-shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+      --radius: 32px;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      width: 100%;
+      font-family: "Segoe UI", Inter, Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--ink);
+    }
+
+    body.auth-body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(20,184,166,0.14), transparent 28%),
+        radial-gradient(circle at 88% 86%, rgba(250,204,21,0.18), transparent 30%),
+        linear-gradient(135deg, #f8fafc 0%, #eefdf9 48%, #f8fafc 100%);
+    }
+
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      padding: 26px;
+      gap: 26px;
+    }
+
+    .visual-panel {
+      position: relative;
+      min-height: calc(100vh - 52px);
+      border-radius: 34px;
+      overflow: hidden;
+      background: #022c22;
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .visual-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(2,44,34,0.88), rgba(2,44,34,0.36)),
+        linear-gradient(to top, rgba(2,44,34,0.92), rgba(2,44,34,0.10));
+      z-index: 2;
+    }
+
+    .visual-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background-size: cover;
+      background-position: center;
+      animation: loginSlide 18s infinite;
+      transform: scale(1.08);
+    }
+
+    .visual-slide:nth-child(1) {
+      background-image: url("/uploads/images/school-building.jpg");
+      animation-delay: 0s;
+    }
+
+    .visual-slide:nth-child(2) {
+      background-image: url("/uploads/images/students-1.jpg");
+      animation-delay: 6s;
+    }
+
+    .visual-slide:nth-child(3) {
+      background-image: url("/uploads/images/students-2.jpg");
+      animation-delay: 12s;
+    }
+
+    .visual-content {
+      position: relative;
+      z-index: 3;
+      min-height: 100%;
+      padding: 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .brand-row img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: white;
+      padding: 6px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.20);
+    }
+
+    .brand-row strong {
+      display: block;
+      font-size: 1.08rem;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-row span {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .hero-copy {
+      max-width: 700px;
+      animation: riseIn 0.8s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #ccfbf1;
+      font-weight: 800;
+      margin-bottom: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-copy h1 {
+      color: white;
+      font-size: clamp(2.6rem, 5vw, 5.3rem);
+      line-height: 0.98;
+      letter-spacing: -2px;
+      font-weight: 950;
+      margin-bottom: 20px;
+    }
+
+    .hero-copy h1 span {
+      color: var(--gold);
+    }
+
+    .hero-copy p {
+      color: rgba(255,255,255,0.82);
+      line-height: 1.85;
+      font-size: 1.08rem;
+      max-width: 610px;
+    }
+
+    .visual-bottom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .info-tile {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(16px);
+      color: white;
+    }
+
+    .info-tile strong {
+      display: block;
+      font-size: 1.12rem;
+      margin-bottom: 5px;
+    }
+
+    .info-tile span {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.45;
+    }
+
+    .form-panel {
+      min-height: calc(100vh - 52px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 26px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      animation: fadeLeft 0.85s ease both;
+    }
+
+    .login-container::before {
+      content: "";
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(250,204,21,0.45), rgba(20,184,166,0.22));
+      top: -54px;
+      right: -34px;
+      filter: blur(2px);
+      z-index: -1;
+      animation: glowPulse 4.4s ease-in-out infinite;
+    }
+
+    .login-card.auth-card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(226,232,240,0.88);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card.auth-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(20,184,166,0.13), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(250,204,21,0.13), transparent 24%);
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .top-links a {
+      text-decoration: none;
+      color: var(--green);
+      font-weight: 850;
+      font-size: 0.9rem;
+    }
+
+    .school-logo.auth-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .school-logo.auth-logo img {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: white;
+      padding: 7px;
+      border: 1px solid #dbeafe;
+      box-shadow: 0 16px 34px rgba(15,23,42,0.14);
+    }
+
+    .auth-title {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .auth-title h1 {
+      color: var(--ink);
+      font-size: 1.9rem;
+      font-weight: 950;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .auth-title p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: #ecfdf5;
+      border: 1px solid #ccfbf1;
+      padding: 7px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+    }
+
+    .auth-tab-btn {
+      border: none;
+      padding: 13px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 900;
+      background: transparent;
+      color: var(--green-dark);
+      transition: 0.28s ease;
+    }
+
+    .auth-tab-btn:hover {
+      background: rgba(255,255,255,0.7);
+    }
+
+    .auth-tab-btn.active {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white;
+      box-shadow: 0 12px 26px rgba(15,118,110,0.22);
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: formIn 0.22s ease;
+    }
+
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .auth-label {
+      color: #334155;
+      font-size: 0.86rem;
+      font-weight: 850;
+    }
+
+    .auth-field input,
+    .auth-field select {
+      width: 100%;
+      border: 1px solid #dbe4ee;
+      background: #f8fafc;
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 15px 15px;
+      outline: none;
+      font-size: 0.95rem;
+      transition: 0.28s ease;
+    }
+
+    .auth-field input:focus,
+    .auth-field select:focus {
+      background: white;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(20,184,166,0.14);
+      transform: translateY(-1px);
+    }
+
+    .auth-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 2px 0;
+    }
+
+    .show-password {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #475569;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .show-password input {
+      accent-color: var(--green);
+    }
+
+    .auth-link {
+      border: none;
+      background: transparent;
+      color: var(--orange);
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.88rem;
+    }
+
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+
+    .auth-submit {
+      border: none;
+      border-radius: 17px;
+      padding: 15px 18px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white;
+      font-weight: 950;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 16px 34px rgba(15,118,110,0.22);
+      transition: 0.28s ease;
+    }
+
+    .auth-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 44px rgba(15,118,110,0.30);
+    }
+
+    .auth-reset-title,
+    .auth-hint,
+    .auth-footer {
+      text-align: center;
+    }
+
+    .auth-reset-title h3 {
+      color: var(--ink);
+      margin-bottom: 4px;
+      font-size: 1.18rem;
+    }
+
+    .auth-reset-title p,
+    .muted,
+    .auth-hint {
+      color: var(--muted);
+    }
+
+    .auth-hint {
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .auth-message {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 14px;
+      border-radius: 15px;
+      font-size: 0.92rem;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .auth-message.show {
+      display: block;
+      animation: formIn 0.24s ease;
+    }
+
+    .auth-message.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .auth-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .auth-message.info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .auth-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .secure-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .secure-pill {
+      padding: 11px 8px;
+      border-radius: 15px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .secure-pill strong {
+      display: block;
+      color: var(--green-dark);
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    @keyframes loginSlide {
+      0% { opacity: 0; transform: scale(1.10); }
+      8% { opacity: 1; transform: scale(1.05); }
+      30% { opacity: 1; transform: scale(1.02); }
+      40% { opacity: 0; transform: scale(1.08); }
+      100% { opacity: 0; transform: scale(1.10); }
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(32px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeLeft {
+      from { opacity: 0; transform: translateX(34px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.55; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    @media (max-width: 1080px) {
+      .login-page {
+        grid-template-columns: 1fr;
+        padding: 18px;
+      }
+
+      .visual-panel {
+        min-height: 430px;
+      }
+
+      .form-panel {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .login-page {
+        padding: 0;
+        gap: 0;
+      }
+
+      .visual-panel {
+        min-height: 330px;
+        border-radius: 0 0 30px 30px;
+      }
+
+      .visual-content {
+        padding: 24px;
+      }
+
+      .hero-copy h1 {
+        font-size: 2.35rem;
+        letter-spacing: -1px;
+      }
+
+      .visual-bottom {
+        display: none;
+      }
+
+      .form-panel {
+        padding: 18px;
+      }
+
+      .login-card.auth-card {
+        padding: 22px;
+        border-radius: 26px;
+      }
+
+      .auth-grid,
+      .secure-row {
+        grid-template-columns: 1fr;
+      }
+
+      .school-logo.auth-logo img {
+        width: 78px;
+        height: 78px;
+      }
+    }
+  </style>
+</head>
+
+<body class="auth-body">
+
+  <main class="login-page">
+
+    <section class="visual-panel">
+      <div class="visual-slide"></div>
+      <div class="visual-slide"></div>
+      <div class="visual-slide"></div>
+
+      <div class="visual-content">
+        <a class="brand-row" href="/">
+          <img src="/uploads/images/logo.png" alt="Chinembiri Primary School Logo">
+          <div>
+            <strong>Chinembiri Primary School</strong>
+            <span>Official School Portal</span>
+          </div>
+        </a>
+
+        <div class="hero-copy">
+          <div class="badge">🔐 Secure Access</div>
+          <h1>Welcome back to <span>your school portal.</span></h1>
+          <p>
+            Access assignments, learning resources, notices, attendance,
+            timetables, fees and academic records through the Chinembiri
+            Primary School digital platform.
+          </p>
+        </div>
+
+        <div class="visual-bottom">
+          <div class="info-tile">
+            <strong>Students</strong>
+            <span>View work, resources and results.</span>
+          </div>
+
+          <div class="info-tile">
+            <strong>Teachers</strong>
+            <span>Manage classes and learning content.</span>
+          </div>
+
+          <div class="info-tile">
+            <strong>Admin</strong>
+            <span>Control school operations securely.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-panel">
+
+      <div class="login-container">
+        <div class="login-card auth-card">
+          <div class="card-inner">
+
+            <div class="top-links">
+              <a href="/">← Back to Website</a>
+              <% if (isAdminLogin) { %>
+                <a href="/login">Portal Login</a>
+              <% } else { %>
+                <a href="/admin-login">Admin Login</a>
+              <% } %>
+            </div>
+
+            <div class="school-logo auth-logo">
+              <img src="/uploads/images/logo.png" alt="Chinembiri Primary School Logo">
+            </div>
+
+            <div class="auth-title">
+              <h1><%= isAdminLogin ? "Admin Login" : "Portal Login" %></h1>
+              <p><%= isAdminLogin ? "Sign in using administrator credentials" : "Sign in using your school-issued details" %></p>
+            </div>
+
+            <% if (!isAdminLogin) { %>
+              <div class="auth-tabs" role="tablist" aria-label="Authentication tabs">
+                <button type="button" class="auth-tab-btn active" onclick="showLogin()">Login</button>
+                <button type="button" class="auth-tab-btn" onclick="showRegister()">Register</button>
+              </div>
+            <% } %>
+
+            <form id="loginForm" class="auth-form" data-login-endpoint="<%= isAdminLogin ? '/admin-login' : '/login' %>">
+              <% if (isAdminLogin) { %>
+                <input type="hidden" id="loginRole" value="admin">
+              <% } else { %>
+                <div class="auth-field">
+                  <label class="auth-label" for="loginRole">Role</label>
+                  <select id="loginRole" required>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                  </select>
+                </div>
+              <% } %>
+
+              <div class="auth-field">
+                <label class="auth-label" for="loginUsername"><%= isAdminLogin ? "Admin Username" : "Username / Registration Number" %></label>
+                <input type="text" id="loginUsername" placeholder="<%= isAdminLogin ? 'Admin username' : 'e.g. A1234Z / Teacher ID' %>" required />
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required />
+              </div>
+
+              <div class="auth-row">
+                <label class="show-password" for="toggleLoginPassword">
+                  <input type="checkbox" id="toggleLoginPassword">
+                  <span>Show Password</span>
+                </label>
+
+                <% if (!isAdminLogin) { %>
+                  <button type="button" class="auth-link forgot-link" onclick="showReset()">
+                    Forgot password?
+                  </button>
+                <% } %>
+              </div>
+
+              <button type="submit" class="auth-submit"><%= isAdminLogin ? "Admin Login" : "🔐 Login Securely" %></button>
+
+              <div class="auth-hint">
+                <span class="muted">Tip:</span> <%= isAdminLogin ? "This page is reserved for school administrators." : "Use your school-issued details to sign in." %>
+              </div>
+            </form>
+
+            <% if (!isAdminLogin) { %>
+            <form id="registerForm" class="auth-form" style="display:none">
+              <div class="auth-field">
+                <label class="auth-label" for="registerRole">Role</label>
+                <select id="registerRole" required>
+                  <option value="">Select Role</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </div>
+
+              <div class="auth-grid">
+                <div class="auth-field">
+                  <label class="auth-label" for="regFirstName">First Name</label>
+                  <input type="text" id="regFirstName" placeholder="First Name" required />
+                </div>
+
+                <div class="auth-field">
+                  <label class="auth-label" for="regLastName">Last Name</label>
+                  <input type="text" id="regLastName" placeholder="Last Name" required />
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="regUniqueId">Student Reg / Teacher ID</label>
+                <input type="text" id="regUniqueId" placeholder="Student Reg (A1234Z) or Teacher ID" required />
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="regPassword">Create Password</label>
+                <input type="password" id="regPassword" placeholder="Create Password" required />
+              </div>
+
+              <button type="submit" class="auth-submit">✅ Activate Account</button>
+
+              <div class="auth-hint">
+                Already activated? <button type="button" class="auth-link" onclick="showLogin()">Go to Login</button>
+              </div>
+            </form>
+
+            <form id="resetForm" class="auth-form" style="display:none">
+              <div class="auth-reset-title">
+                <h3>🔑 Reset Password</h3>
+                <p class="muted">Enter your details to set a new password.</p>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="resetRole">Role</label>
+                <select id="resetRole" required>
+                  <option value="">Select Role</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="resetFullName">Full Name</label>
+                <input type="text" id="resetFullName" placeholder="Full Name (First Last)" required />
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="resetUniqueId">Student Reg / Teacher ID</label>
+                <input type="text" id="resetUniqueId" placeholder="Student Reg Number or Teacher ID" required />
+              </div>
+
+              <div class="auth-field">
+                <label class="auth-label" for="resetNewPassword">New Password</label>
+                <input type="password" id="resetNewPassword" placeholder="New Password" required />
+              </div>
+
+              <button type="submit" class="auth-submit">🔁 Reset Password</button>
+
+              <div class="auth-hint">
+                <button type="button" class="auth-link" onclick="showLogin()">← Back to Login</button>
+              </div>
+            </form>
+            <% } %>
+
+            <div id="authMessage" class="auth-message" aria-live="polite"></div>
+
+            <div class="secure-row">
+              <div class="secure-pill">
+                <strong>Safe</strong>
+                Secure login
+              </div>
+              <div class="secure-pill">
+                <strong>Smart</strong>
+                School tools
+              </div>
+              <div class="secure-pill">
+                <strong>24/7</strong>
+                Online access
+              </div>
+            </div>
+
+            <div class="auth-footer">
+              <span class="muted">©</span> Chinembiri Primary School • Powered by Tralon
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+<script>
+(function () {
+  "use strict";
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function setMessage(type, text) {
+    var box = byId("authMessage");
+    if (!box) {
+      alert(text);
+      return;
+    }
+
+    box.className = "auth-message show " + (type || "info");
+    box.textContent = text || "";
+    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function clearMessage() {
+    var box = byId("authMessage");
+    if (!box) return;
+    box.className = "auth-message";
+    box.textContent = "";
+  }
+
+  function setLoading(form, loading, text) {
+    if (!form) return;
+
+    var btn = form.querySelector("button[type='submit']");
+    if (!btn) return;
+
+    if (!btn.dataset.originalText) {
+      btn.dataset.originalText = btn.textContent;
+    }
+
+    btn.disabled = !!loading;
+    btn.textContent = loading ? (text || "Please wait...") : btn.dataset.originalText;
+  }
+
+  async function safeJsonResponse(res) {
+    var raw = await res.text();
+
+    try {
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) {
+      return {
+        success: false,
+        message: raw && raw.trim()
+          ? raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+          : "Server returned an invalid response."
+      };
+    }
+  }
+
+  function activateTab(mode) {
+    var buttons = document.querySelectorAll(".auth-tab-btn");
+    buttons.forEach(function (btn) {
+      btn.classList.remove("active");
+    });
+
+    if (mode === "login" && buttons[0]) buttons[0].classList.add("active");
+    if (mode === "register" && buttons[1]) buttons[1].classList.add("active");
+  }
+
+  window.showLogin = function () {
+    clearMessage();
+
+    if (byId("loginForm")) byId("loginForm").style.display = "";
+    if (byId("registerForm")) byId("registerForm").style.display = "none";
+    if (byId("resetForm")) byId("resetForm").style.display = "none";
+
+    activateTab("login");
+  };
+
+  window.showRegister = function () {
+    clearMessage();
+
+    if (byId("loginForm")) byId("loginForm").style.display = "none";
+    if (byId("registerForm")) byId("registerForm").style.display = "";
+    if (byId("resetForm")) byId("resetForm").style.display = "none";
+
+    activateTab("register");
+  };
+
+  window.showReset = function () {
+    clearMessage();
+
+    if (byId("loginForm")) byId("loginForm").style.display = "none";
+    if (byId("registerForm")) byId("registerForm").style.display = "none";
+    if (byId("resetForm")) byId("resetForm").style.display = "";
+
+    activateTab("");
+  };
+
+  function cleanFormListeners(formId) {
+    var oldForm = byId(formId);
+    if (!oldForm) return null;
+
+    var newForm = oldForm.cloneNode(true);
+    oldForm.parentNode.replaceChild(newForm, oldForm);
+
+    return newForm;
+  }
+
+  function getValue(id) {
+    var el = byId(id);
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function redirectAfterLogin(role, data) {
+    if (data && data.redirect) {
+      window.location.href = data.redirect;
+      return;
+    }
+
+    if (role === "admin") {
+      window.location.href = "/admin";
+      return;
+    }
+
+    if (role === "teacher") {
+      window.location.href = "/teacher";
+      return;
+    }
+
+    window.location.href = "/student";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var loginForm = cleanFormListeners("loginForm");
+    var registerForm = cleanFormListeners("registerForm");
+    var resetForm = cleanFormListeners("resetForm");
+
+    var toggleLoginPassword = byId("toggleLoginPassword");
+    var loginPassword = byId("loginPassword");
+
+    if (toggleLoginPassword && loginPassword) {
+      toggleLoginPassword.addEventListener("change", function () {
+        loginPassword.type = toggleLoginPassword.checked ? "text" : "password";
+      });
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        clearMessage();
+
+        var role = getValue("loginRole");
+        var username = getValue("loginUsername");
+        var password = getValue("loginPassword");
+
+        if (!role || !username || !password) {
+          setMessage("error", "Please enter role, username and password.");
+          return;
+        }
+
+        setLoading(loginForm, true, "Checking login...");
+
+        try {
+          var loginEndpoint = loginForm.dataset.loginEndpoint || "/login";
+          var res = await fetch(loginEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              role: role,
+              username: username,
+              password: password
+            })
+          });
+
+          var data = await safeJsonResponse(res);
+
+          if (!res.ok || data.success === false) {
+            setMessage("error", data.message || "Invalid username, password or role.");
+            return;
+          }
+
+          setMessage("success", data.message || "Login successful. Redirecting...");
+          setTimeout(function () {
+            redirectAfterLogin(role, data);
+          }, 700);
+
+        } catch (err) {
+          console.error("Login error:", err);
+          setMessage("error", "Could not connect to the server. Please check your internet connection and try again.");
+        } finally {
+          setLoading(loginForm, false);
+        }
+      });
+    }
+
+    if (registerForm) {
+      registerForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        clearMessage();
+
+        var role = getValue("registerRole");
+        var firstName = getValue("regFirstName");
+        var lastName = getValue("regLastName");
+        var uniqueId = getValue("regUniqueId");
+        var password = getValue("regPassword");
+
+        if (!role || !firstName || !lastName || !uniqueId || !password) {
+          setMessage("error", "Please complete all activation fields.");
+          return;
+        }
+
+        if (password.length < 4) {
+          setMessage("error", "Password is too short. Use at least 4 characters.");
+          return;
+        }
+
+        setLoading(registerForm, true, "Activating account...");
+
+        try {
+          var res = await fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              role: role,
+              firstName: firstName,
+              lastName: lastName,
+              uniqueId: uniqueId,
+              password: password
+            })
+          });
+
+          var data = await safeJsonResponse(res);
+
+          if (!res.ok || data.success === false) {
+            setMessage("error", data.message || "Account activation failed. Please confirm your details.");
+            return;
+          }
+
+          setMessage("success", data.message || "Account activated successfully. You can now login.");
+          registerForm.reset();
+          setTimeout(function () {
+            window.showLogin();
+            setMessage("success", "Account activated successfully. Please login now.");
+          }, 900);
+
+        } catch (err) {
+          console.error("Registration error:", err);
+          setMessage("error", "Could not activate account. Server connection failed.");
+        } finally {
+          setLoading(registerForm, false);
+        }
+      });
+    }
+
+    if (resetForm) {
+      resetForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        clearMessage();
+
+        var role = getValue("resetRole");
+        var fullName = getValue("resetFullName");
+        var uniqueId = getValue("resetUniqueId");
+        var newPassword = getValue("resetNewPassword");
+
+        if (!role || !fullName || !uniqueId || !newPassword) {
+          setMessage("error", "Please complete all reset password fields.");
+          return;
+        }
+
+        setLoading(resetForm, true, "Resetting password...");
+
+        try {
+          var res = await fetch("/reset-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              role: role,
+              fullName: fullName,
+              uniqueId: uniqueId,
+              newPassword: newPassword
+            })
+          });
+
+          var data = await safeJsonResponse(res);
+
+          if (!res.ok || data.success === false) {
+            setMessage("error", data.message || "Password reset failed. Please check your details.");
+            return;
+          }
+
+          setMessage("success", data.message || "Password reset successfully. Please login.");
+          resetForm.reset();
+
+          setTimeout(function () {
+            window.showLogin();
+            setMessage("success", "Password reset successfully. Please login.");
+          }, 900);
+
+        } catch (err) {
+          console.error("Reset password error:", err);
+          setMessage("error", "Could not reset password. Server connection failed.");
+        } finally {
+          setLoading(resetForm, false);
+        }
+      });
+    }
+
+    window.showLogin();
+  });
+})();
+</script>
+
+  <script src="/login.js?v=1"></script>
+</body>
+</html>

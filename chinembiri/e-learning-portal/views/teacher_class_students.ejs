@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Class Students | Finance Status</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background: #f4f7fb;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .class-page {
+      padding: 18px;
+      width: 100%;
+    }
+
+    .teacher-finance-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .finance-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .finance-card small {
+      display: block;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .finance-card strong {
+      font-size: 1.25rem;
+      color: #0f172a;
+    }
+
+    .finance-card.warning strong {
+      color: #b45309;
+    }
+
+    .finance-card.danger strong {
+      color: #b91c1c;
+    }
+
+    .finance-card.ok strong {
+      color: #047857;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 14px 0;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      outline: none;
+      min-width: 210px;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 8px 9px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .data-table th {
+      background: #0f766e;
+      color: #fff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .data-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .badge-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-neutral {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .money {
+      font-weight: 900;
+    }
+
+    .money.due {
+      color: #b91c1c;
+    }
+
+    .money.paid {
+      color: #047857;
+    }
+
+    .small-muted {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .teacher-finance-summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .data-table {
+        min-width: 980px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .teacher-finance-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+    .debtor-row {
+      background: #fff8f8;
+    }
+    
+    .debtor-row:hover {
+      background: #ffeaea !important;
+    }
+    
+    .badge-beam {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-camfed {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    👨‍🏫 <strong><%= classInfo.name %> - Students (<%= students.length %>)</strong><br>
+    <small>Debtors, invoice balance and BEAM/CAMFED status</small>
+  </div>
+  <div>
+    <a href="/teacher">⬅ Back</a>
+  </div>
+</header>
+
+<%
+  const totalInvoiced = students.reduce((sum, s) => sum + Number(s.total_invoiced || 0), 0);
+  const totalPaid = students.reduce((sum, s) => sum + Number(s.total_paid || 0), 0);
+  const totalBalance = students.reduce((sum, s) => sum + Number(s.balance || 0), 0);
+  const debtorCount = students.filter(s => Number(s.balance || 0) > 0).length;
+  const sponsoredCount = students.filter(s => s.sponsor_type).length;
+%>
+
+<div class="class-page">
+
+  <div class="teacher-finance-summary">
+    <div class="finance-card">
+      <small>Total Invoiced</small>
+      <strong>$<%= totalInvoiced.toFixed(2) %></strong>
+    </div>
+
+    <div class="finance-card ok">
+      <small>Total Paid</small>
+      <strong>$<%= totalPaid.toFixed(2) %></strong>
+    </div>
+
+    <div class="finance-card danger">
+      <small>Total Outstanding</small>
+      <strong>$<%= totalBalance.toFixed(2) %></strong>
+    </div>
+
+    <div class="finance-card warning">
+      <small>Debtors / Sponsored</small>
+      <strong><%= debtorCount %> / <%= sponsoredCount %></strong>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input id="studentSearch" type="text" placeholder="🔍 Search student/reg no..." onkeyup="filterFinanceStudents()">
+
+    <select id="financeFilter" onchange="filterFinanceStudents()">
+      <option value="">All Students</option>
+      <option value="debtors">Debtors Only</option>
+      <option value="cleared">Cleared Only</option>
+      <option value="sponsored">BEAM/CAMFED Only</option>
+      <option value="beam">BEAM Only</option>
+      <option value="camfed">CAMFED Only</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table" id="teacherFinanceStudentsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Reg No</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Invoiced</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Debtor Status</th>
+          <th>Sponsor</th>
+          <th>Sponsor Status</th>
+          <th>Approved</th>
+          <th>Sponsor Paid</th>
+          <th>Sponsor Bal.</th>
+        </tr>
+      </thead>
+
+     <tbody>
+    <% if (!students || students.length === 0) { %>
+    
+      <tr>
+        <td colspan="13" style="text-align:center;">
+          No students found
+        </td>
+      </tr>
+    
+    <% } else { %>
+    
+      <% students.forEach((s, i) => { 
+    
+        const bal = Number(s.balance || 0);
+        const sponsor = (s.sponsor_type || "").toString();
+    
+        const sponsorUpper = sponsor.toUpperCase();
+        const sponsorStatus = (s.sponsor_status || "").toString().toUpperCase();
+    
+      %>
+    
+        <tr
+          class="<%= bal > 0 ? 'debtor-row' : '' %>"
+          data-search="<%= `${s.unique_id || ''} ${s.first_name || ''} ${s.last_name || ''}`.toLowerCase() %>"
+          data-balance="<%= bal %>"
+          data-sponsor="<%= sponsor.toLowerCase() %>"
+        >
+    
+          <td><%= i + 1 %></td>
+    
+          <td class="money">
+            <%= s.unique_id || 'N/A' %>
+          </td>
+    
+          <td>
+            <strong>
+              <%= (s.first_name || '') + ' ' + (s.last_name || '') %>
+            </strong>
+    
+            <div class="small-muted">
+              <%= s.form_level || "-" %>
+            </div>
+          </td>
+    
+          <td>
+            <span class="badge <%= (s.status || '').toLowerCase() === 'active' ? 'badge-ok' : 'badge-warning' %>">
+              <%= (s.status || 'N/A').toUpperCase() %>
+            </span>
+          </td>
+    
+          <td class="money">
+            $<%= Number(s.total_invoiced || 0).toFixed(2) %>
+          </td>
+    
+          <td class="money paid">
+            $<%= Number(s.total_paid || 0).toFixed(2) %>
+          </td>
+    
+          <td class="money <%= bal > 0 ? 'due' : 'paid' %>">
+            $<%= bal.toFixed(2) %>
+          </td>
+    
+          <td>
+            <% if (bal > 0) { %>
+              <span class="badge badge-danger">
+                Debtor
+              </span>
+            <% } else { %>
+              <span class="badge badge-ok">
+                Cleared
+              </span>
+            <% } %>
+          </td>
+    
+          <!-- Sponsor -->
+          <td>
+    
+            <% let sponsorBadge = "badge-neutral"; %>
+    
+            <% if (sponsorUpper === "BEAM") { %>
+              <% sponsorBadge = "badge-beam"; %>
+            <% } else if (sponsorUpper === "CAMFED") { %>
+              <% sponsorBadge = "badge-camfed"; %>
+            <% } %>
+    
+            <% if (sponsor) { %>
+              <span class="badge <%= sponsorBadge %>">
+                <%= sponsor %>
+              </span>
+            <% } else { %>
+              <span class="small-muted">
+                None
+              </span>
+            <% } %>
+    
+          </td>
+    
+          <!-- Sponsor Status -->
+          <td>
+    
+            <% if (sponsorStatus) { %>
+    
+              <% let statusBadge = "badge-neutral"; %>
+    
+              <% if (sponsorStatus === "PAID") { %>
+                <% statusBadge = "badge-ok"; %>
+              <% } else if (
+                    sponsorStatus === "APPROVED" ||
+                    sponsorStatus === "PARTIAL" ||
+                    sponsorStatus === "PENDING"
+              ) { %>
+                <% statusBadge = "badge-warning"; %>
+              <% } else if (
+                    sponsorStatus === "REJECTED" ||
+                    sponsorStatus === "CANCELLED"
+              ) { %>
+                <% statusBadge = "badge-danger"; %>
+              <% } %>
+    
+              <span class="badge <%= statusBadge %>">
+                <%= sponsorStatus %>
+              </span>
+    
+            <% } else { %>
+    
+              <span class="small-muted">
+                -
+              </span>
+    
+            <% } %>
+    
+          </td>
+    
+          <td>
+            $<%= Number(s.approved_amount || 0).toFixed(2) %>
+          </td>
+    
+          <td>
+            $<%= Number(s.sponsor_paid_amount || 0).toFixed(2) %>
+          </td>
+    
+          <td class="money <%= Number(s.sponsor_balance || 0) > 0 ? 'due' : 'paid' %>">
+            $<%= Number(s.sponsor_balance || 0).toFixed(2) %>
+          </td>
+    
+        </tr>
+    
+      <% }) %>
+    
+    <% } %>
+    </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function filterFinanceStudents() {
+    const q = (document.getElementById("studentSearch")?.value || "").toLowerCase();
+    const filter = document.getElementById("financeFilter")?.value || "";
+    const rows = document.querySelectorAll("#teacherFinanceStudentsTable tbody tr");
+
+    rows.forEach(row => {
+      const search = row.dataset.search || "";
+      const balance = Number(row.dataset.balance || 0);
+      const sponsor = row.dataset.sponsor || "";
+
+      let show = search.includes(q);
+
+      if (filter === "debtors") show = show && balance > 0;
+      if (filter === "cleared") show = show && balance <= 0;
+      if (filter === "sponsored") show = show && sponsor.length > 0;
+      if (filter === "beam") show = show && sponsor === "beam";
+      if (filter === "camfed") show = show && sponsor === "camfed";
+
+      row.style.display = show ? "" : "none";
+    });
+  }
+</script>
+
+</body>
+</html>

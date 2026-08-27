@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chinembiri Primary | Admin Portal</title>
+    <link rel="apple-touch-icon" href="/uploads/images/logo.png">
+    <link rel="icon" href="/uploads/images/favicon.ico" type="image/x-icon">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .totals {
+            font-weight: bold;
+            background-color: #e2e2e2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fees Report</h1>
+
+    <% if (report.length === 0) { %>
+        <p>No records found.</p>
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>User ID</th>
+                    <th>Form Level</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Total Paid</th>
+                    <th>Annual Fee</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% report.forEach(r => { 
+                    const totalPaid = Number(r.total_paid || 0);
+                    const annualFee = r.annual_fee != null ? Number(r.annual_fee) : null;
+                    const balance = annualFee != null ? annualFee - totalPaid : null;
+                %>
+                <tr>
+                    <td><%= r.student_id %></td>
+                    <td><%= r.user_id %></td>
+                    <td><%= r.form_level %></td>
+                    <td><%= r.first_name && r.last_name ? r.first_name + ' ' + r.last_name : '-' %></td>
+                    <td><%= r.phone || '-' %></td>
+                    <td><%= totalPaid.toFixed(2) %></td>
+                    <td><%= annualFee != null ? annualFee.toFixed(2) : '-' %></td>
+                    <td><%= balance != null ? balance.toFixed(2) : '-' %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</body>
+</html>

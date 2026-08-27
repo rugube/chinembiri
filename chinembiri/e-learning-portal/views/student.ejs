@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Portal - Chinembiri Primary School</title>
+     <link rel="icon" href="/uploads/images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div>
+        🎓 <strong>Student Portal - Chinembiri Primary School</strong><br>
+        <small>Welcome back, <%= user.first_name %></small>
+    </div>
+    <div>
+        Student ID: <%= user.unique_id %><br>
+        <a href="/logout">🔒Logout</a>
+    </div>
+</header>
+
+<div class="main-content">
+
+<nav class="sidebar" aria-label="Main navigation">
+  <button class="nav-item" onclick="setActive(this); showPage('dashboard')">
+    <span class="nav-ico">🏠</span><span class="nav-text">Dashboard</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('profile')">
+    <span class="nav-ico">👤</span><span class="nav-text">My Profile</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('grades')">
+    <span class="nav-ico">📊</span><span class="nav-text">My Grades</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('assignments')">
+    <span class="nav-ico">📝</span><span class="nav-text">Assignments</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('class')">
+    <span class="nav-ico">🏫</span><span class="nav-text">My Class</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('timetable')">
+    <span class="nav-ico">📅</span><span class="nav-text">Timetable</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('fees')">
+    <span class="nav-ico">💰</span><span class="nav-text">School Fees</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('library')">
+    <span class="nav-ico">📚</span><span class="nav-text">Library</span>
+  </button>
+
+  <button class="nav-item" onclick="setActive(this); showPage('notices')">
+    <span class="nav-ico">📢</span><span class="nav-text">Notices</span>
+  </button>
+</nav>
+
+<main class="content-area">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page-content active">
+  <div class="dash-header">
+    <div>
+      <h2 class="dash-title">📊 My Dashboard</h2>
+      <p class="dash-subtitle">Overview of your progress, schedule and updates.</p>
+    </div>
+
+    <div class="dash-date">
+      <span class="chip">📅 <%= new Date().toDateString() %></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon">📘</span>
+        <span class="stat-label">Subjects</span>
+      </div>
+      <div class="stat-value"><%= stats.subjects ?? 0 %></div>
+      <div class="stat-foot">Registered subjects</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon">📈</span>
+        <span class="stat-label">Average Grade</span>
+      </div>
+      <div class="stat-value"><%= (stats.average ?? 0) %><span class="stat-unit">%</span></div>
+      <div class="stat-foot">Overall performance</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon">📝</span>
+        <span class="stat-label">Pending Assignments</span>
+      </div>
+      <div class="stat-value"><%= stats.pending ?? 0 %></div>
+      <div class="stat-foot">To be submitted</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-top">
+        <span class="stat-icon">💳</span>
+        <span class="stat-label">Outstanding Fees</span>
+      </div>
+      <div class="stat-value">
+        $<%= (stats.fees ?? 0).toLocaleString?.() ?? (stats.fees ?? 0) %>
+      </div>
+      <div class="stat-foot">Balance due</div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- TIMETABLE -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">📅 Today's Schedule</h3>
+        <span class="panel-badge"><%= timetable?.length ?? 0 %> periods</span>
+      </div>
+
+      <% if (!timetable || timetable.length === 0) { %>
+        <div class="empty">
+          <div class="empty-icon">🕒</div>
+          <div>
+            <strong>No lessons scheduled</strong>
+            <p>Enjoy your free time or check back later.</p>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="table modern">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Time</th>
+                <th>Subject</th>
+                <th>Teacher</th>
+                <th>Room</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% timetable.forEach(t => { %>
+                <tr>
+                  <td><span class="pill"><%= t.period %></span></td>
+                  <td><%= t.time %></td>
+                  <td class="td-strong"><%= t.subject %></td>
+                  <td><%= t.teacher %></td>
+                  <td><%= t.room %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">📢 Recent Announcements</h3>
+        <span class="panel-badge"><%= notices?.length ?? 0 %> new</span>
+      </div>
+
+      <% if (!notices || notices.length === 0) { %>
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          <div>
+            <strong>No announcements</strong>
+            <p>You're all caught up.</p>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="notice-list">
+          <% notices.forEach(n => { %>
+            <div class="notice-card">
+              <div class="notice-top">
+                <strong class="notice-title"><%= n.title %></strong>
+                <small class="notice-date">
+                  <%= new Date(n.created_at).toDateString() %>
+                </small>
+              </div>
+              <p class="notice-msg"><%= n.message %></p>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROFILE -->
+<section id="profile" class="page-content">
+  <div class="profile-head">
+    <div>
+      <h2 class="profile-title">👤 My Profile</h2>
+      <p class="profile-subtitle">View your personal and academic information.</p>
+    </div>
+
+    <div class="profile-badges">
+      <span class="chip">🎓 <%= user.form_level || 'N/A' %></span>
+      <span class="chip status-chip">✅ Active</span>
+    </div>
+  </div>
+
+  <div class="profile-card">
+    <!-- TOP SUMMARY -->
+    <div class="profile-top">
+      <div class="avatar">
+        <span><%= (user.first_name?.[0] || 'S') %><%= (user.last_name?.[0] || 'T') %></span>
+      </div>
+
+      <div class="profile-meta">
+        <h3 class="profile-name"><%= user.first_name %> <%= user.last_name %></h3>
+        <p class="profile-id">Student ID: <strong><%= user.unique_id %></strong></p>
+
+        <div class="profile-mini">
+          <span class="mini-pill">📧 <%= user.email || 'N/A' %></span>
+          <span class="mini-pill">📞 <%= user.phone || 'N/A' %></span>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-pro">Update Profile</button>
+        <p class="profile-note">Keep your contact details up to date.</p>
+      </div>
+    </div>
+
+    <hr class="soft-hr"/>
+
+    <!-- DETAILS GRID -->
+    <div class="profile-grid">
+      <div class="profile-panel">
+        <div class="panel-head">
+          <h4 class="panel-title">📝 Personal Details</h4>
+        </div>
+
+        <div class="kv">
+          <div class="kv-row">
+            <span class="k">Full Name</span>
+            <span class="v"><%= user.first_name %> <%= user.last_name %></span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Student ID</span>
+            <span class="v"><%= user.unique_id %></span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Form / Grade</span>
+            <span class="v"><%= user.form_level || 'N/A' %></span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Email</span>
+            <span class="v"><%= user.email || 'N/A' %></span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Phone</span>
+            <span class="v"><%= user.phone || 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-panel">
+        <div class="panel-head">
+          <h4 class="panel-title">📚 Academic Information</h4>
+        </div>
+
+        <div class="kv">
+          <div class="kv-row">
+            <span class="k">Enrollment Date</span>
+            <span class="v">January 15, 2027</span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Academic Year</span>
+            <span class="v">2026–2027</span>
+          </div>
+
+          <div class="kv-row">
+            <span class="k">Status</span>
+            <span class="v"><span class="status-pill">Active</span></span>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-ico">ℹ️</div>
+          <div>
+            <strong>Tip</strong>
+            <p>If your email or phone is wrong, update it so you don’t miss school announcements.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grades" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">📊 My Grades</h2>
+      <p class="pro-subtitle">Track your academic performance per subject and assignment.</p>
+    </div>
+    <span class="pro-chip"><%= grades?.length ?? 0 %> records</span>
+  </div>
+
+  <div class="pro-card">
+    <div class="pro-card-head">
+      <h3 class="pro-card-title">📈 Academic Performance</h3>
+    </div>
+
+    <% if (!grades || grades.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">📉</div>
+        <div>
+          <strong>No grades yet</strong>
+          <p>Your results will appear here once published.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Assignment</th>
+              <th>Score</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% grades.forEach(g => { %>
+              <tr>
+                <td class="td-strong"><%= g.subject %></td>
+                <td><%= g.title %></td>
+                <td><span class="pro-pill"><%= g.score %></span></td>
+                <td><span class="pro-badge"><%= g.grade %></span></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+
+<section id="assignments" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">📝 My Assignments</h2>
+      <p class="pro-subtitle">View current tasks and download available PDFs.</p>
+    </div>
+    <span class="pro-chip"><%= assignments?.length ?? 0 %> items</span>
+  </div>
+
+  <div class="pro-card">
+    <div class="pro-card-head">
+      <h3 class="pro-card-title">📝 Current Assignments</h3>
+    </div>
+
+    <% if (!assignments || assignments.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">✅</div>
+        <div>
+          <strong>No assignments available</strong>
+          <p>You’re all caught up.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-list">
+        <% assignments.forEach(a => { %>
+          <div class="pro-item">
+            <div class="pro-item-top">
+              <strong class="pro-item-title"><%= a.title %></strong>
+              <span class="pro-chip">Due: <%= a.due_date %></span>
+            </div>
+
+            <p class="pro-item-desc"><%= a.description %></p>
+
+            <div class="pro-item-actions">
+              <% if (a.file_path) { %>
+                <a href="/assignments/download/<%= a.id %>" class="pro-btn pro-btn-primary">
+                  Download PDF
+                </a>
+              <% } else { %>
+                <span class="pro-muted">No file attached</span>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+
+<!-- CLASS & RESOURCES -->
+<section id="class" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">🏫 My Class Resources</h2>
+      <p class="pro-subtitle">Download notes, PDFs and learning materials.</p>
+    </div>
+    <span class="pro-chip"><%= resources?.length ?? 0 %> files</span>
+  </div>
+
+  <div class="pro-card">
+    <% if (!resources || resources.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">📁</div>
+        <div>
+          <strong>No resources uploaded yet</strong>
+          <p>Once uploaded, they will appear here for download.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Date</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% resources.forEach(r => { %>
+              <tr>
+                <td class="td-strong"><%= r.subject %></td>
+                <td><%= r.title %></td>
+                <td><span class="pro-pill"><%= r.type %></span></td>
+                <td><%= new Date(r.created_at).toDateString() %></td>
+                <td>
+                  <a href="/uploads/resources/<%= r.file_path %>" target="_blank" class="pro-btn pro-btn-primary pro-btn-sm">
+                    Download
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+
+<section id="timetable" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">📅 My Timetable</h2>
+      <p class="pro-subtitle">Your weekly schedule by period and day.</p>
+    </div>
+    <span class="pro-chip"><%= timetable?.length ?? 0 %> rows</span>
+  </div>
+
+  <div class="pro-card">
+    <div class="pro-card-head">
+      <h3 class="pro-card-title">📅 Weekly Schedule</h3>
+    </div>
+
+    <div class="pro-table-wrap">
+      <table class="pro-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Time</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% timetable.forEach(periodEntry => { %>
+            <% if (periodEntry.isBreak) { %>
+              <tr class="pro-break">
+                <td><span class="pro-pill"><%= periodEntry.period %></span></td>
+                <td><%= periodEntry.time %></td>
+                <td colspan="5"><strong>⏸ <%= periodEntry.breakName %></strong></td>
+              </tr>
+            <% } else { %>
+              <tr>
+                <td><span class="pro-pill"><%= periodEntry.period %></span></td>
+                <td><%= periodEntry.time %></td>
+                <td><%= periodEntry.monday || '' %></td>
+                <td><%= periodEntry.tuesday || '' %></td>
+                <td><%= periodEntry.wednesday || '' %></td>
+                <td><%= periodEntry.thursday || '' %></td>
+                <td><%= periodEntry.friday || '' %></td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<section id="fees" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">💰 School Fees</h2>
+      <p class="pro-subtitle">Your term fee summary and payment history.</p>
+    </div>
+    <span class="pro-chip">Balance: $<%= stats.fees %></span>
+  </div>
+
+  <div class="pro-card">
+    <div class="fees-grid">
+      <div class="fees-card">
+        <p>Term Fee</p>
+        <strong>$<%= stats.termFeeTotal %></strong>
+      </div>
+      <div class="fees-card fees-good">
+        <p>Amount Paid</p>
+        <strong>$<%= stats.amountPaidTotal %></strong>
+      </div>
+      <div class="fees-card fees-warn">
+        <p>Outstanding</p>
+        <strong>$<%= stats.fees %></strong>
+      </div>
+    </div>
+
+    <div class="pro-divider"></div>
+
+    <div class="pro-card-head">
+      <h3 class="pro-card-title">🧾 Payment History</h3>
+    </div>
+
+    <% if (!paymentHistory || paymentHistory.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">🧾</div>
+        <div>
+          <strong>No payments recorded</strong>
+          <p>Your payment history will appear here.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% paymentHistory.forEach(feeEntry => { %>
+              <tr>
+                <td><%= feeEntry.date_paid %></td>
+                <td class="td-strong">$<%= feeEntry.amount_paid_today %></td>
+                <td><span class="pro-pill"><%= feeEntry.method %></span></td>
+                <td><%= feeEntry.reference %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<section id="library" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">📚 Library</h2>
+      <p class="pro-subtitle">Browse available books and download when provided.</p>
+    </div>
+    <span class="pro-chip"><%= library?.length ?? 0 %> items</span>
+  </div>
+
+  <div class="pro-card">
+    <% if (!library || library.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">📚</div>
+        <div>
+          <strong>No library books available</strong>
+          <p>Please check again later.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% library.forEach(b => { %>
+              <tr>
+                <td class="td-strong"><%= b.title %></td>
+                <td><%= b.author %></td>
+                <td><%= b.category %></td>
+                <td>
+                  <% if (b.file_path) { %>
+                    <span class="pro-badge pro-badge-ok">Available</span>
+                  <% } else { %>
+                    <span class="pro-badge <%= b.available ? 'pro-badge-ok' : 'pro-badge-bad' %>">
+                      <%= b.available ? "Available" : "Borrowed" %>
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (b.file_path) { %>
+                    <a href="/library/download/<%= b.id %>" class="pro-btn pro-btn-primary pro-btn-sm">
+                      Click here
+                    </a>
+                  <% } else { %>
+                    <span class="pro-muted">—</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<section id="notices" class="page-content">
+  <div class="pro-head">
+    <div>
+      <h2 class="pro-title">📢 Notices</h2>
+      <p class="pro-subtitle">Latest announcements from the school.</p>
+    </div>
+    <span class="pro-chip"><%= notices?.length ?? 0 %> updates</span>
+  </div>
+
+  <div class="pro-card">
+    <% if (!notices || notices.length === 0) { %>
+      <div class="pro-empty">
+        <div class="pro-empty-ico">📭</div>
+        <div>
+          <strong>No notices</strong>
+          <p>You’re all caught up.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="pro-list">
+        <% notices.forEach(n => { %>
+          <div class="pro-item">
+            <div class="pro-item-top">
+              <strong class="pro-item-title"><%= n.title %></strong>
+              <span class="pro-chip"><%= new Date(n.created_at).toDateString() %></span>
+            </div>
+            <p class="pro-item-desc"><%= n.message %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>

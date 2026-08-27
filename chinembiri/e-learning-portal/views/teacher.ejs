@@ -1,0 +1,783 @@
+<%
+  const safeStats =
+    (typeof stats !== "undefined" && stats)
+      ? stats
+      : { classes: 0, students: 0, assignments: 0 };
+
+  const safeClasses =
+    (typeof classes !== "undefined" && classes)
+      ? classes
+      : [];
+
+  const safeTodayClasses =
+    (typeof todayClasses !== "undefined" && todayClasses)
+      ? todayClasses
+      : [];
+
+  const safeSubjects =
+    (typeof subjects !== "undefined" && subjects)
+      ? subjects
+      : [];
+
+  const safeResources =
+    (typeof resources !== "undefined" && resources)
+      ? resources
+      : [];
+
+  const safeTimetable =
+    (typeof timetable !== "undefined" && timetable)
+      ? timetable
+      : [];
+
+  const safeClassPerformance =
+    (typeof classPerformance !== "undefined" && classPerformance)
+      ? classPerformance
+      : [];
+
+  const safeStudentProgress =
+    (typeof studentProgress !== "undefined" && studentProgress)
+      ? studentProgress
+      : [];
+
+  const safeAttendanceReport =
+    (typeof attendanceReport !== "undefined" && attendanceReport)
+      ? attendanceReport
+      : [];
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Portal</title>
+      <!-- ✅ Real favicon -->
+  <link rel="icon" href="/uploads/images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div>
+    👨‍🏫 <strong>Teacher Portal</strong><br>
+    <small>Welcome, <%= user.first_name %> <%= user.last_name %></small>
+  </div>
+  <div>
+    Teacher ID: <%= user.unique_id %><br>
+    <a href="/logout">🔒 Logout</a>
+  </div>
+</header>
+
+<div class="main-content">
+
+  <!-- ================= SIDEBAR ================= -->
+<!-- ================= SIDEBAR (TEACHER) ================= -->
+<nav class="sidebar sidebar--teacher" aria-label="Teacher navigation">
+
+  <!-- Brand / user block (optional, safe — no backend change needed) -->
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <span class="sidebar-badge">👨‍🏫</span>
+      <div class="sidebar-brand-text">
+        <div class="sidebar-title">Teacher Portal</div>
+        <div class="sidebar-subtitle">Navigation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation buttons (same JS: showPage('...')) -->
+  <div class="sidebar-nav">
+    <button type="button" class="nav-item" onclick="showPage('dashboard')">
+      <span class="nav-ico">🏠</span><span class="nav-txt">Dashboard</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('classes')">
+      <span class="nav-ico">👥</span><span class="nav-txt">My Classes</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('grades')">
+      <span class="nav-ico">📊</span><span class="nav-txt">Gradebook</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('results')">
+      <span class="nav-ico">🎓</span><span class="nav-txt">Results</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('assignments')">
+      <span class="nav-ico">📝</span><span class="nav-txt">Assignments</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('attendance')">
+      <span class="nav-ico">✅</span><span class="nav-txt">Attendance</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('teacher-timetable')">
+      <span class="nav-ico">🕘</span><span class="nav-txt">Timetable</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('resources')">
+      <span class="nav-ico">📚</span><span class="nav-txt">Resources</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('notices')">
+      <span class="nav-ico">📋</span><span class="nav-txt">Notices</span>
+    </button>
+
+    <button type="button" class="nav-item" onclick="showPage('reports')">
+      <span class="nav-ico">📈</span><span class="nav-txt">Reports</span>
+    </button>
+  </div>
+
+</nav>
+
+  <main class="content-area">
+
+    <!-- ================= DASHBOARD ================= -->
+     <!-- ================= DASHBOARD ================= -->
+    <section id="dashboard" class="page-content active">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📊 Teaching Overview</h2>
+          <p class="tpro-subtitle">A quick snapshot of your classes, students and assignments.</p>
+        </div>
+        <span class="tpro-chip">Today: <%= new Date().toDateString() %></span>
+      </div>
+    
+      <div class="tpro-stats">
+        <div class="tpro-stat">
+          <div class="tpro-stat-top">
+            <span class="tpro-ico">🏫</span>
+            <span class="tpro-label">My Classes</span>
+          </div>
+          <div class="tpro-value"><%= safeStats.classes %></div>
+          <div class="tpro-foot">Assigned classes</div>
+        </div>
+    
+        <div class="tpro-stat">
+          <div class="tpro-stat-top">
+            <span class="tpro-ico">👩‍🎓</span>
+            <span class="tpro-label">Total Students</span>
+          </div>
+          <div class="tpro-value"><%= safeStats.students %></div>
+          <div class="tpro-foot">Across your classes</div>
+        </div>
+    
+        <div class="tpro-stat">
+          <div class="tpro-stat-top">
+            <span class="tpro-ico">📝</span>
+            <span class="tpro-label">Active Assignments</span>
+          </div>
+          <div class="tpro-value"><%= safeStats.assignments %></div>
+          <div class="tpro-foot">Currently available</div>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-card-head">
+          <h3 class="tpro-card-title">⚡ Quick Actions</h3>
+        </div>
+        <div class="tpro-actions">
+          <button class="tpro-btn tpro-btn-primary" onclick="openAddAssignment()">➕ Create Assignment</button>
+          <button class="tpro-btn tpro-btn-primary" onclick="openUploadResource()">⬆️ Upload Resource</button>
+        </div>
+      </div>
+    
+      <div class="tpro-card" style="margin-top:14px;">
+        <div class="tpro-card-head">
+          <h3 class="tpro-card-title">📅 Today's Classes</h3>
+          <span class="tpro-chip"><%= safeTodayClasses.length %> classes</span>
+        </div>
+    
+        <div class="tpro-table-wrap">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Form Level</th>
+                <th>Room</th>
+                <th>Students</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeTodayClasses.length === 0) { %>
+                <tr>
+                  <td colspan="5" class="tpro-center-muted">No classes scheduled for today</td>
+                </tr>
+              <% } else { %>
+                <% safeTodayClasses.forEach(c => { %>
+                  <tr>
+                    <td class="td-strong"><%= c.class_name %></td>
+                    <td><span class="tpro-pill"><%= c.form_level %></span></td>
+                    <td><%= c.room || "-" %></td>
+                    <td><span class="tpro-pill"><%= c.students %></span></td>
+                    <td>
+                      <a href="/teacher/classes/<%= c.id %>/students" class="tpro-btn tpro-btn-primary tpro-btn-sm">
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= TEACHER NOTICES ================= -->
+    <section id="notices" class="page-content" style="margin-top:25px;">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📢 Notices</h2>
+          <p class="tpro-subtitle">Updates from administration.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <div id="teacherNotices">
+          <p class="tpro-center-muted">Loading notices...</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= CLASSES ================= -->
+    <section id="classes" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">👥 My Classes</h2>
+          <p class="tpro-subtitle">View your assigned classes and students.</p>
+        </div>
+        <span class="tpro-chip"><%= safeClasses.length %> classes</span>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-table-wrap">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Form Level</th>
+                <th>Room</th>
+                <th>Students</th>
+                <th>Subjects</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeClasses.length === 0) { %>
+                <tr><td colspan="6" class="tpro-center-muted">No classes assigned</td></tr>
+              <% } else { %>
+                <% safeClasses.forEach(c => { %>
+                  <tr>
+                    <td class="td-strong"><%= c.name %></td>
+                    <td><span class="tpro-pill"><%= c.form_level %></span></td>
+                    <td><%= c.room || "-" %></td>
+                    <td><span class="tpro-pill"><%= c.students || 0 %></span></td>
+                    <td><%= c.subjects ? c.subjects : "Not Assigned" %></td>
+                    <td>
+                      <a href="/teacher/classes/<%= c.id %>/students" class="tpro-btn tpro-btn-primary tpro-btn-sm">
+                        View Students
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= ATTENDANCE ================= -->
+    <section id="attendance" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">✅ Attendance</h2>
+          <p class="tpro-subtitle">Select a class, mark students, then save.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <form method="POST" action="/teacher/attendance" class="tpro-form">
+          <div class="tpro-form-row">
+            <select name="class_id" onchange="loadStudents(this.value)" required class="tpro-select">
+              <option value="">Select Class</option>
+              <% safeClasses.forEach(c => { %>
+                <option value="<%= c.id %>"><%= c.name %> (<%= c.form_level %>)</option>
+              <% }) %>
+            </select>
+    
+            <button id="saveAttendanceBtn" type="submit" class="tpro-btn tpro-btn-primary" disabled>
+              Save Attendance
+            </button>
+          </div>
+    
+          <div class="tpro-table-wrap" style="margin-top:12px;">
+            <table class="tpro-table" id="studentsTable">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+    
+          <p class="tpro-hint">Tip: After students load, mark each learner to enable “Save Attendance”.</p>
+        </form>
+      </div>
+    </section>
+
+
+    <!-- ================= ASSIGNMENTS ================= -->
+    <section id="assignments" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📝 Assignments</h2>
+          <p class="tpro-subtitle">Upload assignments so students can download PDFs.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-actions">
+          <button class="tpro-btn tpro-btn-primary" onclick="openAddAssignment()">➕ Create Assignment</button>
+          <button class="tpro-btn" onclick="openUploadResource()">⬆️ Upload Resource</button>
+        </div>
+        <p class="tpro-hint">Upload a PDF assignment so students can download it.</p>
+      </div>
+    </section>
+
+
+    <!-- ================= GRADEBOOK (MARKING) ================= -->
+    <section id="grades" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📊 Gradebook (Marking)</h2>
+          <p class="tpro-subtitle">Select a class, subject and assignment to load students.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-form-row">
+          <select id="gradeClassSelect" class="tpro-select">
+            <option value="">Select Class</option>
+            <% safeClasses.forEach(c => { %>
+              <option value="<%= c.id %>"><%= c.name %></option>
+            <% }) %>
+          </select>
+    
+          <select id="gradeSubjectSelect" disabled class="tpro-select">
+            <option value="">Select Subject</option>
+          </select>
+    
+          <select id="gradeAssignmentSelect" disabled class="tpro-select">
+            <option value="">Select Assignment</option>
+          </select>
+    
+          <button class="tpro-btn tpro-btn-primary" onclick="loadGradebook()">Load Students</button>
+        </div>
+      </div>
+    
+      <div class="tpro-card" id="gradebookArea" style="display:none;margin-top:14px;">
+        <form id="gradebookForm">
+          <input type="hidden" id="assignment_id">
+    
+          <div class="tpro-table-wrap">
+            <table class="tpro-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Score</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody id="gradebookTable"></tbody>
+            </table>
+          </div>
+    
+          <button class="tpro-btn tpro-btn-primary" style="margin-top:12px;">💾 Save Grades</button>
+        </form>
+      </div>
+    </section>
+
+
+    <!-- ================= RESULTS TABLE ================= -->
+    <section id="results" class="page-content" style="margin-top:25px;">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📋 Results Overview</h2>
+          <p class="tpro-subtitle">Filter and review student results by date, class and subject.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-filters">
+          <input type="date" id="filterDateFrom" class="tpro-input">
+          <input type="date" id="filterDateTo" class="tpro-input">
+    
+          <select id="filterClass" class="tpro-select">
+            <option value="">All Classes</option>
+            <% safeClasses.forEach(c => { %>
+              <option value="<%= c.id %>"><%= c.name %></option>
+            <% }) %>
+          </select>
+    
+          <select id="filterSubject" class="tpro-select">
+            <option value="">All Subjects</option>
+            <% safeSubjects.forEach(s => { %>
+              <option value="<%= s.id %>"><%= s.name %></option>
+            <% }) %>
+          </select>
+    
+          <select id="filterForm" class="tpro-select">
+            <option value="">All Forms</option>
+            <option>Form 1</option><option>Form 2</option><option>Form 3</option>
+            <option>Form 4</option><option>Form 5</option><option>Form 6</option>
+          </select>
+    
+          <button class="tpro-btn tpro-btn-primary" onclick="loadResults()">🔍 Filter</button>
+        </div>
+    
+        <div class="tpro-table-wrap" style="margin-top:12px;">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Assignment</th>
+                <th>Subject</th>
+                <th>Class</th>
+                <th>Score</th>
+                <th>Grade</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTable">
+              <tr>
+                <td colspan="7" class="tpro-center-muted">Apply filters to view results</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= RESOURCES ================= -->
+    <section id="resources" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📚 Teaching Resources</h2>
+          <p class="tpro-subtitle">Upload, download and manage your teaching materials.</p>
+        </div>
+        <button class="tpro-btn tpro-btn-primary" onclick="openUploadResource()">⬆️ Upload New Resource</button>
+      </div>
+    
+      <div class="tpro-card">
+        <% if (safeResources.length === 0) { %>
+          <p class="tpro-center-muted">No resources uploaded yet.</p>
+        <% } else { %>
+          <div class="tpro-list">
+            <% safeResources.forEach(r => { %>
+              <div class="tpro-item">
+                <div class="tpro-item-top">
+                  <strong class="tpro-item-title"><%= r.title %></strong>
+                  <span class="tpro-chip"><%= r.type %></span>
+                </div>
+    
+                <% if (r.description) { %>
+                  <p class="tpro-item-desc"><%= r.description %></p>
+                <% } %>
+    
+                <p class="tpro-meta">
+                  <strong>Subject:</strong> <%= r.subject_name %> |
+                  <strong>Target:</strong> <%= r.target_form || r.form_level %>
+                </p>
+    
+                <div class="tpro-actions">
+                  <a href="/download/<%= r.file_path %>" class="tpro-btn tpro-btn-primary tpro-btn-sm">Download</a>
+    
+                  <form method="POST" action="/teacher/resources/<%= r.id %>/delete" style="display:inline;">
+                    <button class="tpro-btn tpro-btn-danger tpro-btn-sm" type="submit">Delete</button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- ================= TIMETABLE ================= -->
+    <section id="teacher-timetable" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">🕘 My Timetable</h2>
+          <p class="tpro-subtitle">Manage your teaching schedule.</p>
+        </div>
+        <button class="tpro-btn tpro-btn-primary" onclick="openAddTimetable()">➕ Add Schedule</button>
+      </div>
+    
+      <div class="tpro-card">
+        <div class="tpro-table-wrap">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Room</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeTimetable.length === 0) { %>
+                <tr><td colspan="7" class="tpro-center-muted">No timetable entries yet</td></tr>
+              <% } else { %>
+                <% safeTimetable.forEach(t => { %>
+                  <tr>
+                    <td><%= t.day %></td>
+                    <td><%= t.start_time %></td>
+                    <td><%= t.end_time %></td>
+                    <td class="td-strong"><%= t.class_name %></td>
+                    <td><%= t.subject %></td>
+                    <td><%= t.room %></td>
+                    <td class="tpro-actions-cell">
+                      <form action="/teacher/timetable/edit/<%= t.id %>" method="POST" style="display:inline">
+                        <button type="submit" class="tpro-btn tpro-btn-sm">Edit</button>
+                      </form>
+                      <form action="/teacher/timetable/delete/<%= t.id %>" method="POST" style="display:inline">
+                        <button type="submit" class="tpro-btn tpro-btn-danger tpro-btn-sm">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    
+    <!-- ================= REPORTS ================= -->
+    <section id="reports" class="page-content">
+      <div class="tpro-head">
+        <div>
+          <h2 class="tpro-title">📈 Reports</h2>
+          <p class="tpro-subtitle">Class performance, student progress, and attendance insights.</p>
+        </div>
+      </div>
+    
+      <div class="tpro-card">
+        <h3 class="tpro-card-title">📄 Class Performance</h3>
+        <div class="tpro-table-wrap" style="margin-top:10px;">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Students</th>
+                <th>Average Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeClassPerformance.length === 0) { %>
+                <tr><td colspan="3" class="tpro-center-muted">No data available</td></tr>
+              <% } else { %>
+                <% safeClassPerformance.forEach(r => { %>
+                  <tr>
+                    <td class="td-strong"><%= r.class_name %></td>
+                    <td><span class="tpro-pill"><%= r.students %></span></td>
+                    <td><%= r.average_score !== null ? Number(r.average_score).toFixed(1) : "-" %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+      <div class="tpro-card" style="margin-top:14px;">
+        <h3 class="tpro-card-title">📊 Student Progress</h3>
+        <div class="tpro-table-wrap" style="margin-top:10px;">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Average Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeStudentProgress.length === 0) { %>
+                <tr><td colspan="3" class="tpro-center-muted">No student grades recorded</td></tr>
+              <% } else { %>
+                <% safeStudentProgress.forEach(r => { %>
+                  <tr>
+                    <td class="td-strong"><%= r.student_name %></td>
+                    <td><%= r.class_name %></td>
+                    <td><%= r.average_score !== null ? Number(r.average_score).toFixed(1) : "-" %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+      <div class="tpro-card" style="margin-top:14px;">
+        <h3 class="tpro-card-title">✅ Attendance Report</h3>
+        <div class="tpro-table-wrap" style="margin-top:10px;">
+          <table class="tpro-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Student</th>
+                <th>Presents</th>
+                <th>Absents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeAttendanceReport.length === 0) { %>
+                <tr><td colspan="4" class="tpro-center-muted">Attendance not recorded yet</td></tr>
+              <% } else { %>
+                <% safeAttendanceReport.forEach(r => { %>
+                  <tr>
+                    <td class="td-strong"><%= r.class_name %></td>
+                    <td><%= r.student_name %></td>
+                    <td><span class="tpro-badge tpro-badge-ok"><%= r.presents %></span></td>
+                    <td><span class="tpro-badge tpro-badge-bad"><%= r.absents %></span></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= ADD TIMETABLE MODAL ================= -->
+<div id="addTimetableModal" class="modal">
+  <form method="POST" action="/teacher/timetable/add" class="modal-box">
+    <h3>➕ Add Timetable Entry</h3>
+
+    <select name="class_id" required>
+      <option value="">Select Class</option>
+      <% safeClasses.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %> (<%= c.form_level %>)</option>
+      <% }) %>
+    </select>
+
+    <select name="subject_id" required>
+      <option value="">Select Subject</option>
+      <% safeSubjects.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    </select>
+
+    <select name="day" required>
+      <option value="">Select Day</option>
+      <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+      <option>Thursday</option><option>Friday</option><option>Saturday</option>
+    </select>
+
+    <input type="time" name="start_time" required>
+    <input type="time" name="end_time" required>
+    <input name="room" placeholder="Room (optional)">
+
+    <div class="modal-actions">
+      <button type="submit">Save</button>
+      <button type="button" onclick="closeAddTimetable()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ================= ADD ASSIGNMENT MODAL (PDF UPLOAD) ================= -->
+<div id="addAssignmentModal" class="modal">
+  <form method="POST" action="/teacher/assignments/add" enctype="multipart/form-data" class="modal-box">
+    <h3>➕ New Assignment (PDF)</h3>
+
+    <input name="title" placeholder="Assignment Title" required>
+
+    <textarea name="description" placeholder="Assignment Description" required></textarea>
+
+    <select name="class_id" required>
+      <option value="">Select Class</option>
+      <% safeClasses.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %> (<%= c.form_level %>)</option>
+      <% }) %>
+    </select>
+
+    <select name="subject_id" id="assignment_subject" required>
+      <option value="">Select Subject</option>
+      <% safeSubjects.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    </select>
+
+    <input type="date" name="due_date" required>
+
+    <input type="file" name="file" accept="application/pdf" required>
+
+    <div class="modal-actions">
+      <button type="submit">Save Assignment</button>
+      <button type="button" onclick="closeAddAssignment()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- ================= UPLOAD RESOURCE MODAL (PDF ONLY) ================= -->
+<div id="uploadResourceModal" class="modal">
+  <form method="POST" action="/teacher/resources/upload" enctype="multipart/form-data" class="modal-box">
+    <h3>⬆️ Upload Resource (PDF)</h3>
+
+    <input name="title" placeholder="Resource Title" required>
+
+    <textarea name="description" placeholder="Description"></textarea>
+
+    <select name="class_id" required>
+      <option value="">Select Class</option>
+      <% safeClasses.forEach(c => { %>
+        <option value="<%= c.id %>"><%= c.name %> (<%= c.form_level %>)</option>
+      <% }) %>
+    </select>
+
+    <select name="subject_id" required>
+      <option value="">Select Subject</option>
+      <% safeSubjects.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    </select>
+
+    <select name="type">
+      <option>Worksheet</option>
+      <option>Notes</option>
+      <option>Presentation</option>
+      <option>Exam</option>
+      <option>Other</option>
+    </select>
+
+    <input name="target_form" placeholder="Target Form (e.g Form 1)">
+
+    <input type="file" name="file" accept="application/pdf" required>
+
+    <div class="modal-actions">
+      <button type="submit">Upload</button>
+      <button type="button" onclick="closeUploadResource()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<script src="/teacher.js"></script>
+</body>
+</html>
