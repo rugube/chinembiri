@@ -479,6 +479,10 @@ app.post("/login", async (req, res) => {
     return handleLogin(req, res, ["student", "teacher"]);
 });
 
+app.get("/login/admin-login", (req, res) => {
+    return res.redirect("/admin-login");
+});
+
 app.get("/admin-login", (req, res) => {
     res.render("views", { authMode: "admin" });
 });
