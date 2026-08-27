@@ -23,7 +23,7 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f4f6f9;
+  background: #ffffff;
   color: #222;
 }
 
@@ -59,7 +59,7 @@ button {
 
 .login-card h1 {
   margin: 10px 0;
-  color: #1e3c72;
+  color: #1e3c71;
 }
 
 .login-card p {
