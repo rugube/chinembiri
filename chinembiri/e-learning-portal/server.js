@@ -3088,7 +3088,6 @@ app.get("/teacher", requireAuth("teacher"), async (req, res) => {
             SELECT COUNT(DISTINCT ta.class_id) AS total
             FROM teaching_assignments ta
             WHERE ta.teacher_id = ?
-            ORDER BY sub.name ASC
         `, [teacherId]);
 
         const [[studentStat]] = await req.app.locals.db.query(`

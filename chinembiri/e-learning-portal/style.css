@@ -59,7 +59,7 @@ button {
 
 .login-card h1 {
   margin: 10px 0;
-  color: #1e3c71;
+  color: #1e3c72;
 }
 
 .login-card p {
@@ -120,7 +120,7 @@ button {
 
 /* ===================== HEADER ===================== */
 .header {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, #1e3c72, #2a5297);
   display: flex;
   justify-content: space-between;
   align-items: center;
