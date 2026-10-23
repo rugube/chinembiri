@@ -1347,7 +1347,7 @@ app.get("/admin/students/:id/details", requireAuth("admin"), async (req, res) =>
         u.first_name,
         u.last_name,
         u.username,
-        u.email AS account_email,
+        s.email AS account_email,
         u.created_at AS account_created_at,
         c.name AS class_name,
         c.class_code,
