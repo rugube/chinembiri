@@ -2844,6 +2844,36 @@ table,
     margin: 0 0 10px;
 }
 
+#studentDetailsModal {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 90px 16px 24px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 1100;
+}
+
+#studentDetailsModal .modal-box {
+    width: 95%;
+    max-width: 1200px;
+    max-height: calc(100vh - 114px);
+    margin: 0 auto;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+#studentDetailsModal .student-details-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+    background: #fff;
+}
+
 .student-profile-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
