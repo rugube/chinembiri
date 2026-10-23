@@ -89,6 +89,24 @@ function enhanceSearchableSelects(root = document) {
 document.addEventListener("DOMContentLoaded", () => {
   enhanceSearchableSelects();
   showStudentExistsModalFromRedirect();
+
+  const studentTableBody = document.querySelector("#studentsTable tbody");
+  if (studentTableBody) {
+    studentTableBody.addEventListener("click", event => {
+      if (event.target.closest("button, a, form, input, select")) return;
+      const row = event.target.closest("tr[data-student-id]");
+      if (row) openStudentDetails(row.dataset.studentId);
+    });
+
+    studentTableBody.addEventListener("keydown", event => {
+      if (event.target.closest("button, a, form, input, select")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const row = event.target.closest("tr[data-student-id]");
+      if (!row) return;
+      event.preventDefault();
+      openStudentDetails(row.dataset.studentId);
+    });
+  }
 });
 
 // Re-run when opening modals, because some selects are inside hidden modal content.
@@ -144,13 +162,238 @@ function openEditStudent(student) {
     document.getElementById("edit_last_name").value = student.last_name;
     document.getElementById("edit_email").value = student.email;
     document.getElementById("edit_phone").value = student.phone || "";
+    document.getElementById("edit_date_of_birth").value = student.date_of_birth
+        ? String(student.date_of_birth).slice(0, 10)
+        : "";
+    document.getElementById("edit_birth_id_number").value = student.birth_id_number || "";
     document.getElementById("edit_form_level").value = student.form_level;
+    document.getElementById("edit_status").value = student.status || "active";
 
     document.getElementById("editStudentModal").style.display = "flex";
 }
 
 function closeEditStudent() {
     document.getElementById("editStudentModal").style.display = "none";
+}
+
+function closeStudentDetails() {
+    const modal = document.getElementById("studentDetailsModal");
+    if (modal) modal.style.display = "none";
+}
+
+function studentDetailDate(value) {
+    return value ? String(value).slice(0, 10) : "—";
+}
+
+function addStudentDetailSection(container, title) {
+    const section = document.createElement("section");
+    section.className = "student-detail-section";
+    const heading = document.createElement("h4");
+    heading.textContent = title;
+    section.appendChild(heading);
+    container.appendChild(section);
+    return section;
+}
+
+function renderStudentDetailTable(container, title, columns, rows) {
+    const section = addStudentDetailSection(container, title);
+    const wrap = document.createElement("div");
+    wrap.className = "apro-table-wrap";
+    const table = document.createElement("table");
+    table.className = "data-table";
+    const thead = table.createTHead();
+    const headerRow = thead.insertRow();
+    columns.forEach(column => {
+        const cell = document.createElement("th");
+        cell.textContent = column.label;
+        headerRow.appendChild(cell);
+    });
+    const tbody = table.createTBody();
+
+    if (!rows?.length) {
+        const row = tbody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = columns.length;
+        cell.className = "apro-center-muted";
+        cell.textContent = "No records.";
+    } else {
+        rows.forEach(record => {
+            const row = tbody.insertRow();
+            columns.forEach(column => {
+                const cell = row.insertCell();
+                const value = column.value(record);
+                cell.textContent = value === null || value === undefined || value === ""
+                    ? "—"
+                    : String(value);
+            });
+        });
+    }
+
+    wrap.appendChild(table);
+    section.appendChild(wrap);
+}
+
+function renderStudentDetails(data) {
+    const content = document.getElementById("studentDetailsContent");
+    const student = data.student;
+    content.replaceChildren();
+
+    const profile = addStudentDetailSection(content, "Student information");
+    const fields = [
+        ["Student ID", student.id],
+        ["Registration number", student.unique_id],
+        ["Name", `${student.first_name || ""} ${student.last_name || ""}`.trim()],
+        ["Status", student.status],
+        ["Form / grade", student.form_level],
+        ["Current class", student.class_name],
+        ["Class code", student.class_code],
+        ["Room", student.room],
+        ["Admission year", student.admission_year],
+        ["Date of birth", studentDetailDate(student.date_of_birth)],
+        ["Birth / National ID", student.birth_id_number],
+        ["Student email", student.email],
+        ["Phone", student.phone],
+        ["Account username", student.username],
+        ["Account email", student.account_email],
+        ["Admitted", studentDetailDate(student.admitted_at)]
+    ];
+    const grid = document.createElement("dl");
+    grid.className = "student-profile-grid";
+    fields.forEach(([label, value]) => {
+        const item = document.createElement("div");
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value === null || value === undefined || value === ""
+            ? "—"
+            : String(value);
+        item.append(term, description);
+        grid.appendChild(item);
+    });
+    profile.appendChild(grid);
+
+    if (data.guardian) {
+        const guardian = addStudentDetailSection(content, "Parent / guardian contact");
+        const details = document.createElement("p");
+        details.textContent = [data.guardian.name, data.guardian.phone, data.guardian.email]
+            .filter(Boolean).join(" · ") || "No contact information.";
+        guardian.appendChild(details);
+    }
+
+    const attendance = data.attendance || [];
+    const present = attendance.filter(record => record.status === "PRESENT").length;
+    const absent = attendance.filter(record => record.status === "ABSENT").length;
+    const attendanceHeading = `Attendance (${attendance.length} records: ${present} present, ${absent} absent)`;
+
+    renderStudentDetailTable(content, "Class history", [
+        { label: "Year", value: row => row.year },
+        { label: "Term", value: row => row.term_name },
+        { label: "Class", value: row => row.class_name },
+        { label: "Form / grade", value: row => row.form_level },
+        { label: "Room", value: row => row.room }
+    ], data.classHistory);
+    renderStudentDetailTable(content, attendanceHeading, [
+        { label: "Date", value: row => studentDetailDate(row.date) },
+        { label: "Status", value: row => row.status }
+    ], attendance);
+    renderStudentDetailTable(content, "Grades", [
+        { label: "Date", value: row => studentDetailDate(row.created_at) },
+        { label: "Subject", value: row => row.subject },
+        { label: "Assignment", value: row => row.assignment },
+        { label: "Score", value: row => row.score },
+        { label: "Grade", value: row => row.grade }
+    ], data.grades);
+    renderStudentDetailTable(content, "Assignment submissions", [
+        { label: "Submitted", value: row => studentDetailDate(row.submitted_at) },
+        { label: "Subject", value: row => row.subject },
+        { label: "Assignment", value: row => row.assignment },
+        { label: "Due date", value: row => studentDetailDate(row.due_date) },
+        { label: "File", value: row => row.file_path }
+    ], data.submissions);
+    renderStudentDetailTable(content, "Fee records", [
+        { label: "Date paid", value: row => studentDetailDate(row.date_paid) },
+        { label: "Term ID", value: row => row.term_id },
+        { label: "Amount", value: row => row.amount },
+        { label: "Paid", value: row => row.paid },
+        { label: "Method", value: row => row.method },
+        { label: "Reference", value: row => row.reference }
+    ], data.fees);
+    renderStudentDetailTable(content, "Invoices", [
+        { label: "Invoice", value: row => row.id },
+        { label: "Term", value: row => row.term },
+        { label: "Year", value: row => row.year },
+        { label: "Total", value: row => row.total_amount },
+        { label: "Status", value: row => row.status },
+        { label: "Period starts", value: row => studentDetailDate(row.pay_start) },
+        { label: "Period ends", value: row => studentDetailDate(row.pay_end) }
+    ], data.invoices);
+    renderStudentDetailTable(content, "Receipts", [
+        { label: "Receipt", value: row => row.receipt_number },
+        { label: "Date", value: row => studentDetailDate(row.receipt_date) },
+        { label: "Amount", value: row => row.amount },
+        { label: "Method", value: row => row.payment_method },
+        { label: "Reference", value: row => row.reference }
+    ], data.receipts);
+    renderStudentDetailTable(content, "Account ledger", [
+        { label: "Date", value: row => studentDetailDate(row.transaction_date) },
+        { label: "Description", value: row => row.description },
+        { label: "Debit", value: row => row.debit },
+        { label: "Credit", value: row => row.credit },
+        { label: "Balance", value: row => row.balance },
+        { label: "Reference", value: row => [row.reference_type, row.reference_id].filter(Boolean).join(" #") }
+    ], data.ledger);
+    renderStudentDetailTable(content, "Sponsorships", [
+        { label: "Sponsor type", value: row => row.sponsor_type },
+        { label: "Approved", value: row => row.approved_amount },
+        { label: "Paid", value: row => row.paid_amount },
+        { label: "Balance", value: row => row.balance },
+        { label: "Status", value: row => row.status },
+        { label: "Notes", value: row => row.notes }
+    ], data.sponsorships);
+    renderStudentDetailTable(content, "Library loans", [
+        { label: "Book", value: row => row.title },
+        { label: "Author", value: row => row.author },
+        { label: "Borrowed", value: row => studentDetailDate(row.borrowed_at) },
+        { label: "Due", value: row => studentDetailDate(row.due_date) },
+        { label: "Returned", value: row => studentDetailDate(row.returned_at) },
+        { label: "Status", value: row => row.status }
+    ], data.borrowings);
+}
+
+async function openStudentDetails(studentId) {
+    const modal = document.getElementById("studentDetailsModal");
+    const content = document.getElementById("studentDetailsContent");
+    if (!modal || !content) return;
+
+    modal.style.display = "flex";
+    content.replaceChildren();
+    const loading = document.createElement("p");
+    loading.className = "apro-center-muted";
+    loading.textContent = "Loading student information...";
+    content.appendChild(loading);
+
+    try {
+        const response = await fetch(`/admin/students/${encodeURIComponent(studentId)}/details`);
+        const responseText = await response.text();
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            throw new Error(`Student details service returned an invalid response (HTTP ${response.status}).`);
+        }
+        if (!response.ok) throw new Error(data.message || "Could not load student details");
+        if (!data.student) throw new Error("Student details were not included in the response.");
+        renderStudentDetails(data);
+        document.getElementById("studentDetailsTitle").textContent =
+            `Student Profile — ${data.student.first_name} ${data.student.last_name}`;
+    } catch (err) {
+        console.error("Student detail load failed:", err);
+        content.replaceChildren();
+        const message = document.createElement("p");
+        message.className = "apro-center-muted";
+        message.textContent = err.message || "Could not load student information.";
+        content.appendChild(message);
+    }
 }
 
 function filterTeachers(value) {
@@ -1154,10 +1397,32 @@ async function loadDebtors(autostart = false) {
 function clearDebtorsFilter() {
   const fromEl = document.getElementById('debtorsFrom');
   const toEl = document.getElementById('debtorsTo');
+  const classEl = document.getElementById('debtorsClass');
+  const formEl = document.getElementById('debtorsForm');
   if (fromEl) fromEl.value = '';
   if (toEl) toEl.value = '';
+  if (classEl) classEl.value = '';
+  if (formEl) formEl.value = '';
   window.__debtorsLoadedOnce = false;
   loadDebtors(false);
+}
+
+function exportDebtorsExcel() {
+  const params = new URLSearchParams();
+  const filters = [
+    ['from', 'debtorsFrom'],
+    ['to', 'debtorsTo'],
+    ['class_id', 'debtorsClass'],
+    ['form_level', 'debtorsForm']
+  ];
+
+  filters.forEach(([parameter, elementId]) => {
+    const value = document.getElementById(elementId)?.value?.trim();
+    if (value) params.set(parameter, value);
+  });
+
+  const query = params.toString();
+  window.location.href = `/admin/finance/export/debtors.xlsx${query ? `?${query}` : ""}`;
 }
 
 // basic HTML escaping for injected strings
@@ -1429,6 +1694,7 @@ async function searchStudents(query) {
     studentSearchTimeout = setTimeout(async () => {
 
         const tbody = document.querySelector("#studentsTable tbody");
+        if (!tbody) return;
 
         if (!query.trim()) {
             location.reload();
@@ -1446,55 +1712,43 @@ async function searchStudents(query) {
             tbody.innerHTML = "";
 
             if (!students.length) {
-
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="10">
-                            No students found
-                        </td>
-                    </tr>
-                `;
-
+                const row = tbody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 10;
+                cell.textContent = "No students found";
                 return;
             }
 
             students.forEach(s => {
+                const row = tbody.insertRow();
+                row.className = "student-directory-row";
+                row.dataset.studentId = s.id;
+                row.tabIndex = 0;
+                row.title = "Click to view student details";
+                const values = [
+                    s.id,
+                    s.unique_id,
+                    `${s.first_name || ""} ${s.last_name || ""}`.trim(),
+                    s.form_level || "-",
+                    s.email || "-",
+                    s.phone || "-",
+                    s.date_of_birth ? String(s.date_of_birth).slice(0, 10) : "-",
+                    s.birth_id_number || "-",
+                    (s.status || "active").toUpperCase()
+                ];
 
-                tbody.innerHTML += `
-                    <tr>
+                values.forEach(value => {
+                    row.insertCell().textContent = value ?? "-";
+                });
 
-                        <td>${s.id}</td>
-
-                        <td>${s.unique_id}</td>
-
-                        <td>${s.first_name} ${s.last_name}</td>
-
-                        <td>${s.form_level || "-"}</td>
-
-                        <td>${s.email || "-"}</td>
-
-                        <td>${s.phone || "-"}</td>
-
-                        <td>${s.date_of_birth || "-"}</td>
-
-                        <td>${s.birth_id_number || "-"}</td>
-
-                        <td>${s.status || "-"}</td>
-
-                        <td>
-
-                            <button
-                                class="btn btn-primary btn-sm"
-                                onclick="editStudent(${s.id})">
-
-                                Edit
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-                `;
+                const actionsCell = row.insertCell();
+                actionsCell.className = "col-actions";
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.className = "apro-btn apro-btn-sm";
+                editButton.textContent = "✏️ Edit";
+                editButton.addEventListener("click", () => openEditStudent(s));
+                actionsCell.appendChild(editButton);
             });
 
         } catch (err) {

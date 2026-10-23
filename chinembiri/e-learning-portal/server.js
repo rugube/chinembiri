@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import csv from "csv-parser";
 import fs from "fs";
+import * as XLSX from "xlsx";
 
 
 const storage = multer.diskStorage({
@@ -875,37 +876,31 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
     const db = req.app.locals.db;
     const user = req.session.user;
 
-    /* ================= DASHBOARD STATS ================= */
-    const [[studentsCount]] = await db.query(
-      "SELECT COUNT(*) AS total FROM students WHERE status='active'"
-    );
-
-    const [[teachersCount]] = await db.query(
-      "SELECT COUNT(*) AS total FROM teachers"
-    );
-
-    const [[classesCount]] = await db.query(
-      "SELECT COUNT(*) AS total FROM classes"
-    );
-
-    const [[revenue]] = await db.query(
-      "SELECT IFNULL(SUM(paid),0) AS total FROM fees WHERE MONTH(date_paid)=MONTH(CURDATE())"
-    );
-
-    /* ================= ACTIVITY FEED ================= */
-    const [activities] = await db
-      .query(
-        `
+    // These dashboard datasets are independent, so fetch them concurrently
+    // instead of adding each database round trip to the page's response time.
+    const [
+      [[studentsCount]],
+      [[teachersCount]],
+      [[classesCount]],
+      [[revenue]],
+      [activities],
+      [studentsList],
+      [teachersList],
+      [classesList],
+      [subjects],
+      [feeStructure]
+    ] = await Promise.all([
+      db.query("SELECT COUNT(*) AS total FROM students WHERE status='active'"),
+      db.query("SELECT COUNT(*) AS total FROM teachers"),
+      db.query("SELECT COUNT(*) AS total FROM classes"),
+      db.query("SELECT IFNULL(SUM(paid),0) AS total FROM fees WHERE MONTH(date_paid)=MONTH(CURDATE())"),
+      db.query(`
         SELECT message, created_at
         FROM system_logs
         ORDER BY created_at DESC
         LIMIT 5
-      `
-      )
-      .catch(() => [[]]);
-
-    /* ================= STUDENTS ================= */
-    const [studentsList] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT 
         s.id,
         s.class_id,
@@ -922,9 +917,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       JOIN users u ON u.id = s.user_id
       ORDER BY u.last_name ASC, u.first_name ASC, u.unique_id ASC
       LIMIT 5000
-    `);
-    /* ================= TEACHERS ================= */
-    const [teachersList] = await db.query(`
+      `),
+      db.query(`
       SELECT 
         t.id,
         u.first_name,
@@ -938,10 +932,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       FROM teachers t
       JOIN users u ON t.user_id = u.id
       ORDER BY u.last_name ASC, u.first_name ASC
-    `);
-
-    /* ================= CLASSES ================= */
-    const [classesList] = await db.query(`
+      `),
+      db.query(`
       SELECT
         c.id,
         c.class_code,
@@ -990,30 +982,27 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
         END,
         c.name ASC,
         c.class_code ASC
-    `);
-    /* ================= SUBJECTS ================= */
-    const [subjects] = await db.query(
-      "SELECT id, name FROM subjects ORDER BY name"
-    );
-
-    /* ================= FEES STRUCTURE ================= */
-    const [feeStructure] = await db.query(
-      "SELECT * FROM fee_structure ORDER BY CASE WHEN UPPER(form_level) LIKE 'ECD A%' THEN 1 WHEN UPPER(form_level) LIKE 'ECD B%' THEN 2 WHEN UPPER(form_level) LIKE 'GRADE 1%' THEN 3 WHEN UPPER(form_level) LIKE 'GRADE 2%' THEN 4 WHEN UPPER(form_level) LIKE 'GRADE 3%' THEN 5 WHEN UPPER(form_level) LIKE 'GRADE 4%' THEN 6 WHEN UPPER(form_level) LIKE 'GRADE 5%' THEN 7 WHEN UPPER(form_level) LIKE 'GRADE 6%' THEN 8 WHEN UPPER(form_level) LIKE 'GRADE 7%' THEN 9 ELSE 999 END, form_level"
-    );
+      `),
+      db.query("SELECT id, name FROM subjects ORDER BY name"),
+      db.query("SELECT * FROM fee_structure ORDER BY CASE WHEN UPPER(form_level) LIKE 'ECD A%' THEN 1 WHEN UPPER(form_level) LIKE 'ECD B%' THEN 2 WHEN UPPER(form_level) LIKE 'GRADE 1%' THEN 3 WHEN UPPER(form_level) LIKE 'GRADE 2%' THEN 4 WHEN UPPER(form_level) LIKE 'GRADE 3%' THEN 5 WHEN UPPER(form_level) LIKE 'GRADE 4%' THEN 6 WHEN UPPER(form_level) LIKE 'GRADE 5%' THEN 7 WHEN UPPER(form_level) LIKE 'GRADE 6%' THEN 8 WHEN UPPER(form_level) LIKE 'GRADE 7%' THEN 9 ELSE 999 END, form_level")
+    ]);
 
     /* ================= FINANCE ================= */
 
-    // --- Income ---
-    const [[totalIncome]] = await db.query(`
-      SELECT IFNULL(SUM(amount),0) AS total
-      FROM invoice_payments
-    `);
-
-    // --- Expenses total ---
-    const [[totalExpenses]] = await db.query(`
-      SELECT IFNULL(SUM(amount),0) AS total
-      FROM expenses
-    `);
+    // --- Income and expense totals ---
+    const [
+      [[totalIncome]],
+      [[totalExpenses]]
+    ] = await Promise.all([
+      db.query(`
+        SELECT IFNULL(SUM(amount),0) AS total
+        FROM invoice_payments
+      `),
+      db.query(`
+        SELECT IFNULL(SUM(amount),0) AS total
+        FROM expenses
+      `)
+    ]);
 
     // --- Invoices (PAID from fees table, supports optional date range columns pay_start/pay_end) ---
     let invoices = [];
@@ -1105,47 +1094,42 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       invoices = rows;
     }
 
-    // --- Payments ---
-    const [payments] = await db.query(`
-      SELECT *
-      FROM invoice_payments
-      ORDER BY paid_at DESC
-    `);
-
-    // --- Expenses ---
-    const [expenses] = await db.query(`
-      SELECT id, category, description, amount, expense_date
-      FROM expenses
-      ORDER BY expense_date DESC
-    `);
-
-    // --- Expense Categories ---
-    const [expenseCategories] = await db.query(
-      "SELECT * FROM expense_categories ORDER BY name"
-    );
-
-    // --- Suppliers ---
-    const [suppliers] = await db.query(
-      "SELECT * FROM suppliers ORDER BY name"
-    );
-
-    // --- Purchase Categories ---
-    const [purchaseCategories] = await db.query(
-      "SELECT * FROM purchase_categories ORDER BY name"
-    );
-
-    // --- Assets ---
-    const [assets] = await db.query(
-      "SELECT * FROM assets ORDER BY name"
-    );
-
-    // --- Ledger ---
-    const [ledger] = await db.query(
-      "SELECT * FROM ledger ORDER BY transaction_date DESC"
-    );
-
-    // --- Professional Finance Additions ---
-    const [receipts] = await db.query(`
+    // These finance tables are independent too. Fetch them together to avoid
+    // serial database round trips while preserving the same page datasets.
+    const [
+      [payments],
+      [expenses],
+      [expenseCategories],
+      [suppliers],
+      [purchaseCategories],
+      [assets],
+      [ledger],
+      [receipts],
+      [studentLedger],
+      [cashbook],
+      [budgets],
+      [auditLogs],
+      [feeStatements],
+      [beamCamfed],
+      [[beamCamfedStats]],
+      [employees]
+    ] = await Promise.all([
+      db.query(`
+        SELECT *
+        FROM invoice_payments
+        ORDER BY paid_at DESC
+      `),
+      db.query(`
+        SELECT id, category, description, amount, expense_date
+        FROM expenses
+        ORDER BY expense_date DESC
+      `),
+      db.query("SELECT * FROM expense_categories ORDER BY name"),
+      db.query("SELECT * FROM suppliers ORDER BY name"),
+      db.query("SELECT * FROM purchase_categories ORDER BY name"),
+      db.query("SELECT * FROM assets ORDER BY name"),
+      db.query("SELECT * FROM ledger ORDER BY transaction_date DESC"),
+      db.query(`
       SELECT
         r.*,
         u.unique_id,
@@ -1155,9 +1139,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       JOIN students s ON s.id = r.student_id
       JOIN users u ON u.id = s.user_id
       ORDER BY r.receipt_date DESC
-    `).catch(() => [[]]);
-
-    const [studentLedger] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT
         sl.*,
         u.unique_id,
@@ -1169,22 +1152,19 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       JOIN users u ON u.id = s.user_id
       ORDER BY sl.transaction_date DESC, sl.id DESC
       LIMIT 500
-    `).catch(() => [[]]);
-
-    const [cashbook] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT *
       FROM cashbook
       ORDER BY transaction_date DESC, id DESC
       LIMIT 500
-    `).catch(() => [[]]);
-
-    const [budgets] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT *
       FROM budgets
       ORDER BY year DESC, category ASC
-    `).catch(() => [[]]);
-
-    const [auditLogs] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT
         a.*,
         CONCAT(u.first_name, ' ', u.last_name) AS user_name
@@ -1192,9 +1172,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       LEFT JOIN users u ON u.id = a.user_id
       ORDER BY a.created_at DESC
       LIMIT 300
-    `).catch(() => [[]]);
-
-    const [feeStatements] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT
         fs.*,
         u.unique_id,
@@ -1205,9 +1184,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       JOIN users u ON u.id = s.user_id
       ORDER BY fs.created_at DESC
       LIMIT 300
-    `).catch(() => [[]]);
-
-    const [beamCamfed] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT
         sp.*,
         u.unique_id,
@@ -1222,22 +1200,20 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       JOIN users u ON u.id = s.user_id
       LEFT JOIN classes c ON c.id = s.class_id
       ORDER BY sp.created_at DESC
-    `).catch(() => [[]]);
-
-    const [[beamCamfedStats]] = await db.query(`
+      `).catch(() => [[]]),
+      db.query(`
       SELECT
         IFNULL(SUM(approved_amount),0) AS approved,
         IFNULL(SUM(paid_amount),0) AS paid,
         IFNULL(SUM(balance),0) AS balance
       FROM sponsorships
-    `).catch(() => [[{ approved: 0, paid: 0, balance: 0 }]]);
-
-    /* ================= EMPLOYEES ================= */
-    const [employees] = await db.query(`
+      `).catch(() => [[{ approved: 0, paid: 0, balance: 0 }]]),
+      db.query(`
       SELECT *
       FROM employees
       ORDER BY first_name, last_name
-    `);
+      `)
+    ]);
 
     /* ================= RENDER ================= */
     return res.render("admin", {
@@ -1347,6 +1323,162 @@ app.get("/admin/students/search", requireAuth("admin"), async (req, res) => {
     }
 
 });
+
+app.get("/admin/students/:id/details", requireAuth("admin"), async (req, res) => {
+  const db = req.app.locals.db;
+  const studentId = Number(req.params.id);
+
+  if (!Number.isInteger(studentId) || studentId < 1) {
+    return res.status(400).json({ message: "Invalid student ID" });
+  }
+
+  try {
+    const [studentRows] = await db.query(`
+      SELECT
+        s.id,
+        s.class_id,
+        s.form_level,
+        s.email,
+        s.phone,
+        s.date_of_birth,
+        s.birth_id_number,
+        s.status,
+        s.admission_year,
+        s.created_at AS admitted_at,
+        u.unique_id,
+        u.first_name,
+        u.last_name,
+        u.username,
+        u.email AS account_email,
+        u.created_at AS account_created_at,
+        c.name AS class_name,
+        c.class_code,
+        c.room
+      FROM students s
+      JOIN users u ON u.id = s.user_id
+      LEFT JOIN classes c ON c.id = s.class_id
+      WHERE s.id = ?
+      LIMIT 1
+    `, [studentId]);
+
+    if (!studentRows.length) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const [
+      [classHistory],
+      [attendance],
+      [grades],
+      [submissions],
+      [fees],
+      [invoices],
+      [receipts],
+      [ledger],
+      [sponsorships],
+      guardian,
+      [borrowings]
+    ] = await Promise.all([
+      db.query(`
+        SELECT c.name AS class_name, c.class_code, c.room, c.form_level,
+               t.name AS term_name, t.year
+        FROM student_classes sc
+        JOIN classes c ON c.id = sc.class_id
+        JOIN terms t ON t.id = sc.term_id
+        WHERE sc.student_id = ?
+        ORDER BY t.year DESC, t.term_number DESC
+      `, [studentId]).catch(() => [[]]),
+      db.query(`
+        SELECT date, status
+        FROM attendance
+        WHERE student_id = ?
+        ORDER BY date DESC
+      `, [studentId]),
+      db.query(`
+        SELECT g.score, g.grade, g.created_at, a.title AS assignment,
+               sub.name AS subject
+        FROM grades g
+        LEFT JOIN assignments a ON a.id = g.assignment_id
+        LEFT JOIN subjects sub ON sub.id = a.subject_id
+        WHERE g.student_id = ?
+        ORDER BY g.created_at DESC
+      `, [studentId]),
+      db.query(`
+        SELECT a.title AS assignment, sub.name AS subject,
+               a.due_date, ss.file_path, ss.submitted_at
+        FROM submissions ss
+        JOIN assignments a ON a.id = ss.assignment_id
+        LEFT JOIN subjects sub ON sub.id = a.subject_id
+        WHERE ss.student_id = ?
+        ORDER BY ss.submitted_at DESC
+      `, [studentId]),
+      db.query(`
+        SELECT id, term_id, amount, paid, method, reference, date_paid
+        FROM fees
+        WHERE student_id = ?
+        ORDER BY date_paid DESC, id DESC
+      `, [studentId]),
+      db.query(`
+        SELECT id, term, year, total_amount, status, pay_start, pay_end, created_at
+        FROM invoices
+        WHERE student_id = ?
+        ORDER BY year DESC, id DESC
+      `, [studentId]),
+      db.query(`
+        SELECT receipt_number, amount, payment_method, reference, receipt_date
+        FROM receipts
+        WHERE student_id = ?
+        ORDER BY receipt_date DESC
+      `, [studentId]).catch(() => [[]]),
+      db.query(`
+        SELECT transaction_date, description, debit, credit, balance,
+               reference_type, reference_id
+        FROM student_ledger
+        WHERE student_id = ?
+        ORDER BY transaction_date DESC, id DESC
+      `, [studentId]).catch(() => [[]]),
+      db.query(`
+        SELECT sponsor_type, approved_amount, paid_amount, balance, status,
+               notes, created_at
+        FROM sponsorships
+        WHERE student_id = ?
+        ORDER BY created_at DESC
+      `, [studentId]).catch(() => [[]]),
+      db.query(`
+        SELECT name, email, phone
+        FROM customers
+        WHERE student_id = ?
+        LIMIT 1
+      `, [studentId]).then(([rows]) => rows[0] || null).catch(() => null),
+      db.query(`
+        SELECT b.title, b.author, lb.borrowed_at, lb.due_date,
+               lb.returned_at, lb.status
+        FROM library_borrowings lb
+        JOIN library_books b ON b.id = lb.book_id
+        WHERE lb.student_id = ?
+        ORDER BY lb.borrowed_at DESC
+      `, [studentId]).catch(() => [[]])
+    ]);
+
+    return res.json({
+      student: studentRows[0],
+      classHistory,
+      attendance,
+      grades,
+      submissions,
+      fees,
+      invoices,
+      receipts,
+      ledger,
+      sponsorships,
+      guardian,
+      borrowings
+    });
+  } catch (err) {
+    console.error("Student details error:", err);
+    return res.status(500).json({ message: "Could not load student details" });
+  }
+});
+
 app.post("/admin/teachers/edit", requireAuth("admin"), async (req, res) => {
   const { id, first_name, last_name, email, department, status, employee_number, date_of_appointment } = req.body;
 
@@ -5006,101 +5138,147 @@ app.get("/student/classes", requireAuth("student"), async (req, res) => {
 });
 
 // ====================== DEBTORS (Outstanding Balances) ======================
-app.get("/admin/finance/debtors", requireAuth("admin"), async (req, res) => {
-  const db = req.app.locals.db;
+async function getDebtorRows(db, filters = {}) {
+  const invoiceWhere = [];
+  const invoiceParams = [];
+  const studentWhere = ["s.status = 'active'"];
+  const studentParams = [];
 
-  try {
-    const { class_id, form_level } = req.query;
+  if (filters.from && /^\d{4}-\d{2}-\d{2}$/.test(filters.from)) {
+    invoiceWhere.push("i.created_at >= ?");
+    invoiceParams.push(filters.from);
+  }
+  if (filters.to && /^\d{4}-\d{2}-\d{2}$/.test(filters.to)) {
+    invoiceWhere.push("i.created_at < DATE_ADD(?, INTERVAL 1 DAY)");
+    invoiceParams.push(filters.to);
+  }
+  if (filters.class_id) {
+    studentWhere.push("s.class_id = ?");
+    studentParams.push(filters.class_id);
+  }
+  if (filters.form_level) {
+    studentWhere.push("s.form_level = ?");
+    studentParams.push(filters.form_level);
+  }
 
-    const where = ["s.status = 'active'"];
-    const params = [];
+  const invoiceFilterSql = invoiceWhere.length
+    ? `WHERE ${invoiceWhere.join(" AND ")}`
+    : "";
 
-    if (class_id) {
-      where.push("s.class_id = ?");
-      params.push(class_id);
-    }
-
-    if (form_level) {
-      where.push("s.form_level = ?");
-      params.push(form_level);
-    }
-
-    const sql = `
+  const sql = `
+    SELECT
+      s.id AS student_id,
+      u.unique_id AS student_reg,
+      u.first_name,
+      u.last_name,
+      s.form_level,
+      c.name AS class_name,
+      debt.invoice_terms,
+      debt.total_invoiced,
+      debt.total_paid,
+      debt.balance,
+      COALESCE(sp.sponsor_type, '') AS sponsor_type,
+      COALESCE(sp.approved_amount, 0) AS approved_amount,
+      COALESCE(sp.sponsor_paid, 0) AS sponsor_paid
+    FROM students s
+    JOIN users u ON u.id = s.user_id
+    LEFT JOIN classes c ON c.id = s.class_id
+    JOIN (
       SELECT
-          s.id AS student_id,
-          u.unique_id AS student_reg,
-          u.first_name,
-          u.last_name,
-          s.form_level,
-          c.name AS class_name,
-
-          IFNULL(fs.term_fee, 0) AS total_invoiced,
-
-          IFNULL(pay.total_paid, 0) AS total_paid,
-
-          GREATEST(
-            IFNULL(fs.term_fee, 0) -
-            IFNULL(pay.total_paid, 0),
-            0
-          ) AS balance,
-
-          sp.sponsor_type,
-          IFNULL(sp.approved_amount,0) AS approved_amount,
-          IFNULL(sp.paid_amount,0) AS sponsor_paid
-
-      FROM students s
-
-      JOIN users u
-        ON u.id = s.user_id
-
-      LEFT JOIN classes c
-        ON c.id = s.class_id
-
-      LEFT JOIN fee_structure fs
-        ON fs.form_level = s.form_level
-
+        i.student_id,
+        GROUP_CONCAT(DISTINCT CONCAT(i.term, ' ', i.year)
+                     ORDER BY i.year, i.term SEPARATOR ', ') AS invoice_terms,
+        SUM(i.total_amount) AS total_invoiced,
+        SUM(COALESCE(pay.total_paid, 0)) AS total_paid,
+        GREATEST(SUM(i.total_amount) - SUM(COALESCE(pay.total_paid, 0)), 0) AS balance
+      FROM invoices i
       LEFT JOIN (
-          SELECT
-              student_id,
-              SUM(paid) AS total_paid
-          FROM fees
-          GROUP BY student_id
-      ) pay
-        ON pay.student_id = s.id
+        SELECT invoice_id, SUM(amount) AS total_paid
+        FROM invoice_payments
+        GROUP BY invoice_id
+      ) pay ON pay.invoice_id = i.id
+      ${invoiceFilterSql}
+      GROUP BY i.student_id
+    ) debt ON debt.student_id = s.id
+    LEFT JOIN (
+      SELECT
+        student_id,
+        GROUP_CONCAT(DISTINCT sponsor_type ORDER BY sponsor_type SEPARATOR ', ') AS sponsor_type,
+        SUM(approved_amount) AS approved_amount,
+        SUM(paid_amount) AS sponsor_paid
+      FROM sponsorships
+      WHERE status IN ('APPROVED', 'PARTIAL', 'PAID')
+      GROUP BY student_id
+    ) sp ON sp.student_id = s.id
+    WHERE ${studentWhere.join(" AND ")}
+      AND debt.balance > 0
+    ORDER BY debt.balance DESC, u.last_name, u.first_name
+  `;
 
-      LEFT JOIN sponsorships sp
-        ON sp.student_id = s.id
-        AND sp.status IN ('APPROVED','PARTIAL','PAID')
+  const [rows] = await db.query(sql, [...invoiceParams, ...studentParams]);
+  return rows;
+}
 
-      WHERE ${where.join(" AND ")}
-
-      HAVING balance > 0
-
-      ORDER BY
-          balance DESC,
-          u.last_name,
-          u.first_name
-    `;
-
-    const [rows] = await db.query(sql, params);
-
-    const total_outstanding = rows.reduce(
-      (sum, r) => sum + Number(r.balance || 0),
-      0
-    );
-
-    res.json({
-      rows,
-      total_outstanding
-    });
-
+app.get("/admin/finance/debtors", requireAuth("admin"), async (req, res) => {
+  try {
+    const rows = await getDebtorRows(req.app.locals.db, req.query);
+    const total_outstanding = rows.reduce((sum, row) => sum + Number(row.balance || 0), 0);
+    return res.json({ rows, total_outstanding });
   } catch (err) {
     console.error("Debtors route error:", err);
+    return res.status(500).json({ rows: [], total_outstanding: 0 });
+  }
+});
 
-    res.status(500).json({
-      rows: [],
-      total_outstanding: 0
-    });
+app.get("/admin/finance/export/debtors.xlsx", requireAuth("admin"), async (req, res) => {
+  try {
+    const rows = await getDebtorRows(req.app.locals.db, req.query);
+    const table = [
+      ["Student ID", "Registration No.", "Student Name", "Form / Grade", "Class", "Invoice Terms", "Total Invoiced", "Total Paid", "Outstanding Balance", "Sponsor Type", "Sponsorship Approved", "Sponsorship Paid"],
+      ...rows.map(row => [
+        Number(row.student_id),
+        row.student_reg || "",
+        `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+        row.form_level || "",
+        row.class_name || "",
+        row.invoice_terms || "",
+        Number(row.total_invoiced || 0),
+        Number(row.total_paid || 0),
+        Number(row.balance || 0),
+        row.sponsor_type || "",
+        Number(row.approved_amount || 0),
+        Number(row.sponsor_paid || 0)
+      ])
+    ];
+    const totalOutstanding = rows.reduce((sum, row) => sum + Number(row.balance || 0), 0);
+    table.push([]);
+    table.push(["Total Debtors", rows.length]);
+    table.push(["Total Outstanding", "", "", "", "", "", "", "", totalOutstanding]);
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(table);
+    worksheet["!cols"] = [
+      { wch: 12 }, { wch: 18 }, { wch: 28 }, { wch: 16 },
+      { wch: 22 }, { wch: 30 }, { wch: 18 }, { wch: 16 },
+      { wch: 20 }, { wch: 18 }, { wch: 22 }, { wch: 20 }
+    ];
+    for (let rowIndex = 1; rowIndex <= rows.length; rowIndex += 1) {
+      for (const column of [6, 7, 8, 10, 11]) {
+        const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: column });
+        if (worksheet[cellAddress]) worksheet[cellAddress].z = '"$"#,##0.00';
+      }
+    }
+    const totalCell = XLSX.utils.encode_cell({ r: rows.length + 3, c: 8 });
+    if (worksheet[totalCell]) worksheet[totalCell].z = '"$"#,##0.00';
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Debtors");
+
+    const excelFile = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", 'attachment; filename="debtors-list.xlsx"');
+    return res.send(excelFile);
+  } catch (err) {
+    console.error("Debtors Excel export error:", err);
+    return res.status(500).send("Could not export the debtors list.");
   }
 });
 

@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "seed:finance-students": "node scripts/seed-finance-students.js"
   },
   "author": "Tralon",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.9.4",
-    "qs": "^6.15.2"
+    "qs": "^6.15.2",
+    "xlsx": "^0.18.5"
   }
 }

@@ -2825,6 +2825,56 @@ table,
 
 /* VIEW STUDENTS MODAL FIX */
 
+.student-directory-row {
+    cursor: pointer;
+}
+
+.student-directory-row:hover,
+.student-directory-row:focus-visible {
+    background: #f1f7ff;
+    outline: 2px solid #93c5fd;
+    outline-offset: -2px;
+}
+
+.student-detail-section {
+    margin: 18px 0;
+}
+
+.student-detail-section h4 {
+    margin: 0 0 10px;
+}
+
+.student-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.student-profile-grid > div {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.student-profile-grid dt {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.student-profile-grid dd {
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .student-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 #viewStudentsModal {
     align-items: flex-start !important;
     padding-top: 90px !important;
