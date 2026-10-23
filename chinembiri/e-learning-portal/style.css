@@ -2707,23 +2707,20 @@ button:hover {
   .apro-grid-2{ grid-template-columns: 1fr; }
 }
 
-/* ==========================================================
-   ✅ FINAL OVERRIDES: REMOVE TABLE SCROLL & FIT SMALL SCREEN
-   (keeps everything else untouched)
-========================================================== */
-
-/* Disable any overflow scroll wrappers used earlier */
+/* Shared responsive table behavior */
 .table-wrap,
 .pro-table-wrap,
 .tpro-table-wrap,
 .table-wrapper,
 .table-scroll,
 .apro-table-wrap {
-  overflow: visible !important;
-  -webkit-overflow-scrolling: auto !important;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Tables should fit screen & wrap */
+/* Keep table headings and columns intact; let narrow screens scroll sideways. */
 table,
 .table,
 .data-table,
@@ -2731,7 +2728,7 @@ table,
 .pro-table,
 .tpro-table {
   width: 100% !important;
-  min-width: 0 !important;
+  min-width: 640px;
   table-layout: auto !important;
 }
 
@@ -2741,85 +2738,51 @@ table,
 .pro-table th, .pro-table td,
 .tpro-table th, .tpro-table td {
   white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
-/* Mobile: convert tables into stacked cards (no scroll) */
+/* Keep the student directory columns wide enough for desktop text. */
+#studentsTable {
+  min-width: 1320px;
+  table-layout: fixed !important;
+}
+
+#studentsTable th:nth-child(1), #studentsTable td:nth-child(1) { width: 54px; }
+#studentsTable th:nth-child(2), #studentsTable td:nth-child(2) { width: 112px; }
+#studentsTable th:nth-child(3), #studentsTable td:nth-child(3) { width: 170px; }
+#studentsTable th:nth-child(4), #studentsTable td:nth-child(4) { width: 100px; }
+#studentsTable th:nth-child(5), #studentsTable td:nth-child(5) { width: 205px; }
+#studentsTable th:nth-child(6), #studentsTable td:nth-child(6) { width: 130px; }
+#studentsTable th:nth-child(7), #studentsTable td:nth-child(7) { width: 130px; }
+#studentsTable th:nth-child(8), #studentsTable td:nth-child(8) { width: 190px; }
+#studentsTable th:nth-child(9), #studentsTable td:nth-child(9) { width: 105px; }
+#studentsTable th:nth-child(10), #studentsTable td:nth-child(10) { width: 270px; }
+
+#studentsTable td:first-child,
+#studentsTable td:nth-child(2),
+#studentsTable td:nth-child(6),
+#studentsTable td:nth-child(7),
+#studentsTable td:nth-child(9) {
+  white-space: nowrap !important;
+}
+
+#studentsTable td:nth-child(5) {
+  overflow-wrap: anywhere;
+}
+
+#studentsTable td.col-actions {
+  white-space: nowrap !important;
+}
+
 @media (max-width: 768px) {
-
-  .data-table thead,
-  .admin-table thead,
-  .pro-table thead,
-  .tpro-table thead,
-  table.table thead {
-    display: none !important;
-  }
-
-  .data-table tbody tr,
-  .admin-table tbody tr,
-  .pro-table tbody tr,
-  .tpro-table tbody tr,
-  table.table tbody tr {
-    display: block !important;
-    margin: 0 0 12px 0 !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 14px !important;
-    overflow: hidden !important;
-    background: #fff !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-  }
-
-  .data-table tbody td,
-  .admin-table tbody td,
-  .pro-table tbody td,
-  .tpro-table tbody td,
-  table.table tbody td {
-    display: flex !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    padding: 10px 12px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    text-align: left !important;
-  }
-
-  .data-table tbody td:last-child,
-  .admin-table tbody td:last-child,
-  .pro-table tbody td:last-child,
-  .tpro-table tbody td:last-child,
-  table.table tbody td:last-child {
-    border-bottom: none !important;
-  }
-
-  .data-table tbody td::before,
-  .admin-table tbody td::before,
-  .pro-table tbody td::before,
-  .tpro-table tbody td::before,
-  table.table tbody td::before {
-    content: attr(data-label);
-    font-weight: 900;
-    color: #64748b;
-    flex: 0 0 44%;
-    max-width: 44%;
-  }
-
-  .data-table tbody td:empty::after,
-  .admin-table tbody td:empty::after,
-  .pro-table tbody td:empty::after,
-  .tpro-table tbody td:empty::after,
-  table.table tbody td:empty::after {
-    content: "—";
-    color: #94a3b8;
-    font-weight: 800;
-  }
-
   .data-table tbody td,
   .admin-table tbody td,
   .pro-table tbody td,
   .tpro-table tbody td,
   table.table tbody td {
     font-size: 13px !important;
+    padding: 8px !important;
   }
 }
 
