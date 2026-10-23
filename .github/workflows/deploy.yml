@@ -23,4 +23,4 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./chinembiri/e-learning-portal/
-          server-dir: nodeapp/chinembiri/e-learning-portal/
+          server-dir: ./
