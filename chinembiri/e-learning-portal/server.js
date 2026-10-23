@@ -4025,9 +4025,9 @@ app.get("/teacher/classes/:classId/students", requireAuth("teacher"), async (req
 
           c.name AS class_name,
 
-          COALESCE(fs.term_fee,0) AS total_invoiced,
+          COALESCE(invoice_totals.total_invoiced,0) AS total_invoiced,
 
-          COALESCE(pay.total_paid,0) AS total_paid,
+          COALESCE(invoice_totals.total_paid,0) AS total_paid,
 
           sp.sponsor_type,
           COALESCE(sp.approved_amount,0) AS approved_amount,
@@ -4036,8 +4036,8 @@ app.get("/teacher/classes/:classId/students", requireAuth("teacher"), async (req
           sp.status AS sponsor_status,
 
           GREATEST(
-              COALESCE(fs.term_fee,0)
-              - COALESCE(pay.total_paid,0)
+              COALESCE(invoice_totals.total_invoiced,0)
+              - COALESCE(invoice_totals.total_paid,0)
               - COALESCE(sp.paid_amount,0),
               0
           ) AS balance
@@ -4050,18 +4050,21 @@ app.get("/teacher/classes/:classId/students", requireAuth("teacher"), async (req
       LEFT JOIN classes c
           ON c.id = s.class_id
 
-      LEFT JOIN fee_structure fs
-          ON TRIM(UPPER(fs.form_level))
-           = TRIM(UPPER(s.form_level))
-
       LEFT JOIN (
           SELECT
-              student_id,
-              SUM(paid) AS total_paid
-          FROM fees
-          GROUP BY student_id
-      ) pay
-          ON pay.student_id = s.id
+              i.student_id,
+              SUM(i.total_amount) AS total_invoiced,
+              SUM(COALESCE(payments.total_paid, 0)) AS total_paid
+          FROM invoices i
+          LEFT JOIN (
+              SELECT invoice_id, SUM(amount) AS total_paid
+              FROM invoice_payments
+              GROUP BY invoice_id
+          ) payments
+              ON payments.invoice_id = i.id
+          GROUP BY i.student_id
+      ) invoice_totals
+          ON invoice_totals.student_id = s.id
 
       LEFT JOIN (
           SELECT sp1.*
