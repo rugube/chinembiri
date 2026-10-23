@@ -2742,28 +2742,49 @@ table,
   word-break: normal;
 }
 
-/* Keep the student directory columns wide enough for desktop text. */
-#studentsTable {
-  min-width: 1320px;
-  table-layout: fixed !important;
+/* Student directory: fit every column to the page without horizontal scrolling. */
+.student-table-wrap {
+  overflow-x: hidden !important;
 }
 
-#studentsTable th:nth-child(1), #studentsTable td:nth-child(1) { width: 54px; }
-#studentsTable th:nth-child(2), #studentsTable td:nth-child(2) { width: 112px; }
-#studentsTable th:nth-child(3), #studentsTable td:nth-child(3) { width: 170px; }
-#studentsTable th:nth-child(4), #studentsTable td:nth-child(4) { width: 100px; }
-#studentsTable th:nth-child(5), #studentsTable td:nth-child(5) { width: 205px; }
-#studentsTable th:nth-child(6), #studentsTable td:nth-child(6) { width: 130px; }
-#studentsTable th:nth-child(7), #studentsTable td:nth-child(7) { width: 130px; }
-#studentsTable th:nth-child(8), #studentsTable td:nth-child(8) { width: 190px; }
-#studentsTable th:nth-child(9), #studentsTable td:nth-child(9) { width: 105px; }
-#studentsTable th:nth-child(10), #studentsTable td:nth-child(10) { width: 270px; }
+#studentsTable {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+#studentsTable th,
+#studentsTable td {
+  padding: 9px 8px;
+  vertical-align: middle;
+  line-height: 1.35;
+}
+
+#studentsTable th {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: normal !important;
+}
+
+#studentsTable th:nth-child(1), #studentsTable td:nth-child(1) { width: 4%; }
+#studentsTable th:nth-child(2), #studentsTable td:nth-child(2) { width: 9%; }
+#studentsTable th:nth-child(3), #studentsTable td:nth-child(3) { width: 12%; }
+#studentsTable th:nth-child(4), #studentsTable td:nth-child(4) { width: 7%; }
+#studentsTable th:nth-child(5), #studentsTable td:nth-child(5) { width: 14%; }
+#studentsTable th:nth-child(6), #studentsTable td:nth-child(6) { width: 9%; }
+#studentsTable th:nth-child(7), #studentsTable td:nth-child(7) { width: 8%; }
+#studentsTable th:nth-child(8), #studentsTable td:nth-child(8) { width: 13%; }
+#studentsTable th:nth-child(9), #studentsTable td:nth-child(9) { width: 8%; }
+#studentsTable th:nth-child(10), #studentsTable td:nth-child(10) { width: 16%; }
 
 #studentsTable td:first-child,
 #studentsTable td:nth-child(2),
 #studentsTable td:nth-child(6),
-#studentsTable td:nth-child(7),
-#studentsTable td:nth-child(9) {
+#studentsTable td:nth-child(7) {
   white-space: nowrap !important;
 }
 
@@ -2772,7 +2793,27 @@ table,
 }
 
 #studentsTable td.col-actions {
-  white-space: nowrap !important;
+  white-space: normal !important;
+  text-align: center;
+}
+
+#studentsTable td.col-actions form {
+  display: inline-block !important;
+  margin: 3px;
+}
+
+#studentsTable td.col-actions .apro-btn {
+  padding: 7px 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#studentsTable tbody tr:hover {
+  background: #f8fbff;
+}
+
+#studentsTable tbody tr:nth-child(even) {
+  background: #fbfcfe;
 }
 
 @media (max-width: 768px) {
@@ -2835,6 +2876,23 @@ table,
     gap: 12px;
     padding: 4px 0;
     background: #fff;
+}
+
+#editStudentModal {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 90px 16px 24px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 1100;
+}
+
+#editStudentModal .modal-box {
+    width: min(440px, 100%);
+    max-height: calc(100vh - 114px);
+    margin: 0 auto;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .student-profile-grid {
