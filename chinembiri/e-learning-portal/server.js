@@ -25,7 +25,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const databaseConfig = {
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "elearning_portal",
+    multipleStatements: true
+};
 
 /* ===================== MIDDLEWARE ===================== */
 app.disable("x-powered-by");
@@ -77,13 +84,7 @@ app.use((req, res, next) => {
 });
 
 async function initDatabase() {
-    const connection = await mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "",
-        database: "elearning_portal",
-        multipleStatements: true
-    });
+    const connection = await mysql.createConnection(databaseConfig);
 
     await ensureRegistrationUniqueness(connection);
 
@@ -178,10 +179,7 @@ async function startServer() {
     await initDatabase();
 
     const db = mysql.createPool({
-        host: "localhost",
-        user: "root",
-        password: "",
-        database: "elearning_portal",
+        ...databaseConfig,
         waitForConnections: true
     });
 
@@ -1344,7 +1342,7 @@ app.get("/admin/students/:id/details", requireAuth("admin"), async (req, res) =>
         s.birth_id_number,
         s.status,
         s.admission_year,
-        s.created_at AS admitted_at,
+        u.created_at AS admitted_at,
         u.unique_id,
         u.first_name,
         u.last_name,
