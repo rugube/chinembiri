@@ -1714,7 +1714,7 @@ async function searchStudents(query) {
             if (!students.length) {
                 const row = tbody.insertRow();
                 const cell = row.insertCell();
-                cell.colSpan = 10;
+                cell.colSpan = 8;
                 cell.textContent = "No students found";
                 return;
             }
@@ -1732,8 +1732,6 @@ async function searchStudents(query) {
                     s.form_level || "-",
                     s.email || "-",
                     s.phone || "-",
-                    s.date_of_birth ? String(s.date_of_birth).slice(0, 10) : "-",
-                    s.birth_id_number || "-",
                     (s.status || "active").toUpperCase()
                 ];
 
