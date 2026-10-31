@@ -1016,48 +1016,31 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
           i.pay_start,
           i.pay_end,
 
-          -- ✅ paid from fees (date range aware)
-          IFNULL(SUM(
-            CASE
-              WHEN (i.pay_start IS NULL OR i.pay_end IS NULL) THEN f.paid
-              WHEN f.date_paid BETWEEN i.pay_start AND i.pay_end THEN f.paid
-              ELSE 0
-            END
-          ), 0) AS paid_amount,
-
-          (i.total_amount - IFNULL(SUM(
-            CASE
-              WHEN (i.pay_start IS NULL OR i.pay_end IS NULL) THEN f.paid
-              WHEN f.date_paid BETWEEN i.pay_start AND i.pay_end THEN f.paid
-              ELSE 0
-            END
-          ), 0)) AS balance,
-
+          COALESCE(pay.paid_amount, 0) AS paid_amount,
+          GREATEST(i.total_amount - COALESCE(pay.paid_amount, 0), 0) AS balance,
           CASE
-            WHEN IFNULL(SUM(
-              CASE
-                WHEN (i.pay_start IS NULL OR i.pay_end IS NULL) THEN f.paid
-                WHEN f.date_paid BETWEEN i.pay_start AND i.pay_end THEN f.paid
-                ELSE 0
-              END
-            ), 0) = 0 THEN 'UNPAID'
-            WHEN IFNULL(SUM(
-              CASE
-                WHEN (i.pay_start IS NULL OR i.pay_end IS NULL) THEN f.paid
-                WHEN f.date_paid BETWEEN i.pay_start AND i.pay_end THEN f.paid
-                ELSE 0
-              END
-            ), 0) < i.total_amount THEN 'PARTIAL'
+            WHEN i.status = 'CANCELLED' THEN 'CANCELLED'
+            WHEN COALESCE(pay.paid_amount, 0) <= 0 THEN 'UNPAID'
+            WHEN COALESCE(pay.paid_amount, 0) < i.total_amount THEN 'PARTIAL'
             ELSE 'PAID'
           END AS status,
-
+          COALESCE(rc.receipt_numbers, '') AS receipt_numbers,
           u.first_name,
           u.last_name
         FROM invoices i
         JOIN students s ON s.id = i.student_id
         JOIN users u ON u.id = s.user_id
-        LEFT JOIN fees f ON f.student_id = i.student_id
-        GROUP BY i.id
+        LEFT JOIN (
+          SELECT invoice_id, SUM(amount) AS paid_amount
+          FROM invoice_payments
+          GROUP BY invoice_id
+        ) pay ON pay.invoice_id = i.id
+        LEFT JOIN (
+          SELECT invoice_id, GROUP_CONCAT(receipt_number ORDER BY receipt_date SEPARATOR ', ') AS receipt_numbers
+          FROM receipts
+          WHERE invoice_id IS NOT NULL
+          GROUP BY invoice_id
+        ) rc ON rc.invoice_id = i.id
         ORDER BY i.created_at DESC
       `);
       invoices = rows;
@@ -1071,22 +1054,30 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
           i.year,
           i.total_amount,
 
-          IFNULL(SUM(f.paid), 0) AS paid_amount,
-          (i.total_amount - IFNULL(SUM(f.paid), 0)) AS balance,
+          COALESCE(pay.paid_amount, 0) AS paid_amount,
+          GREATEST(i.total_amount - COALESCE(pay.paid_amount, 0), 0) AS balance,
 
           CASE
-            WHEN IFNULL(SUM(f.paid), 0) = 0 THEN 'UNPAID'
-            WHEN IFNULL(SUM(f.paid), 0) < i.total_amount THEN 'PARTIAL'
+            WHEN i.status = 'CANCELLED' THEN 'CANCELLED'
+            WHEN COALESCE(pay.paid_amount, 0) <= 0 THEN 'UNPAID'
+            WHEN COALESCE(pay.paid_amount, 0) < i.total_amount THEN 'PARTIAL'
             ELSE 'PAID'
           END AS status,
-
+          COALESCE(rc.receipt_numbers, '') AS receipt_numbers,
           u.first_name,
           u.last_name
         FROM invoices i
         JOIN students s ON s.id = i.student_id
         JOIN users u ON u.id = s.user_id
-        LEFT JOIN fees f ON f.student_id = i.student_id
-        GROUP BY i.id
+        LEFT JOIN (
+          SELECT invoice_id, SUM(amount) AS paid_amount
+          FROM invoice_payments
+          GROUP BY invoice_id
+        ) pay ON pay.invoice_id = i.id
+        LEFT JOIN (
+          SELECT invoice_id, GROUP_CONCAT(receipt_number ORDER BY receipt_date SEPARATOR ', ') AS receipt_numbers
+          FROM receipts WHERE invoice_id IS NOT NULL GROUP BY invoice_id
+        ) rc ON rc.invoice_id = i.id
         ORDER BY i.created_at DESC
       `);
       invoices = rows;
@@ -1113,9 +1104,10 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       [employees]
     ] = await Promise.all([
       db.query(`
-        SELECT *
-        FROM invoice_payments
-        ORDER BY paid_at DESC
+        SELECT ip.*, r.receipt_number
+        FROM invoice_payments ip
+        LEFT JOIN receipts r ON r.payment_id = ip.id
+        ORDER BY ip.paid_at DESC, ip.id DESC
       `),
       db.query(`
         SELECT id, category, description, amount, expense_date
@@ -1874,6 +1866,71 @@ app.post("/admin/students/add", requireAuth("admin"), async (req, res) => {
   }
 });
 
+app.post("/admin/students/bulk", requireAuth("admin"), async (req, res) => {
+  const rows = Array.isArray(req.body?.students) ? req.body.students : [];
+  if (!rows.length) return res.status(400).json({ error: "Enter at least one student." });
+  if (rows.length > 200) return res.status(400).json({ error: "Add no more than 200 students at a time." });
+  const db = req.app.locals.db;
+  let conn;
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+    let added = 0;
+    const skipped = [];
+    for (let index = 0; index < rows.length; index += 1) {
+      const row = rows[index] || {};
+      const first_name = String(row.first_name || "").trim();
+      const last_name = String(row.last_name || "").trim();
+      const email = String(row.email || "").trim();
+      const phone = String(row.phone || "").trim();
+      const form_level = String(row.form_level || "").trim();
+      const date_of_birth = String(row.date_of_birth || "").trim();
+      const birth_id_number = normalizeBirthId(row.birth_id_number);
+      const rowNumber = index + 1;
+      if (!first_name || !last_name || !form_level || !birth_id_number || !/^\d{4}-\d{2}-\d{2}$/.test(date_of_birth)) {
+        skipped.push({ row: rowNumber, reason: "Required name, grade, date of birth, or national ID is missing." });
+        continue;
+      }
+      const [[duplicate]] = await conn.query(
+        `SELECT s.id FROM students s JOIN users u ON u.id = s.user_id
+         WHERE s.birth_id_number = ? OR (LOWER(TRIM(u.first_name)) = ? AND LOWER(TRIM(u.last_name)) = ?)
+         LIMIT 1`,
+        [birth_id_number, normalizeName(first_name), normalizeName(last_name)]
+      );
+      if (duplicate) {
+        skipped.push({ row: rowNumber, reason: "A student with this name or national ID already exists." });
+        continue;
+      }
+      let regNumber;
+      let exists = true;
+      while (exists) {
+        regNumber = generateStudentReg();
+        const [matches] = await conn.query("SELECT id FROM users WHERE unique_id = ? LIMIT 1", [regNumber]);
+        exists = matches.length > 0;
+      }
+      const [userResult] = await conn.query(
+        `INSERT INTO users (username, password, role, first_name, last_name, unique_id)
+         VALUES (?, 'NOT_SET', 'student', ?, ?, ?)`,
+        [regNumber.toLowerCase(), first_name, last_name, regNumber]
+      );
+      await conn.query(
+        `INSERT INTO students (user_id, form_level, email, phone, date_of_birth, birth_id_number)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [userResult.insertId, form_level, email || null, phone || null, date_of_birth, birth_id_number]
+      );
+      added += 1;
+    }
+    await conn.commit();
+    return res.json({ added, skipped });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error("Bulk add students error:", err);
+    return res.status(500).json({ error: "Could not save the student entries." });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
 
 app.post("/admin/students/delete/:id", requireAuth("admin"), async (req, res) => {
   const db = req.app.locals.db;
@@ -1956,6 +2013,42 @@ app.get(
 
   }
 );
+
+app.get("/admin/classes/:id/export.xlsx", requireAuth("admin"), async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const [[classInfo]] = await db.query(
+      "SELECT id, name, class_code, form_level FROM classes WHERE id = ? LIMIT 1",
+      [req.params.id]
+    );
+    if (!classInfo) return res.status(404).send("Class not found");
+    const [students] = await db.query(`
+      SELECT u.unique_id AS registration_number, u.first_name, u.last_name,
+             s.form_level, s.email, s.phone, s.date_of_birth, s.status
+      FROM students s
+      JOIN users u ON u.id = s.user_id
+      WHERE s.class_id = ?
+      ORDER BY u.last_name, u.first_name
+    `, [req.params.id]);
+    const rows = [
+      ["Registration Number", "First Name", "Last Name", "Form / Grade", "Email", "Phone", "Date of Birth", "Status"],
+      ...students.map(s => [s.registration_number || "", s.first_name || "", s.last_name || "", s.form_level || "", s.email || "", s.phone || "", s.date_of_birth ? String(s.date_of_birth).slice(0, 10) : "", s.status || ""])
+    ];
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    worksheet["!cols"] = [{ wch: 20 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 30 }, { wch: 18 }, { wch: 16 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+    const excelFile = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+    const safeClassName = String(classInfo.name || classInfo.class_code).replace(/[^a-z0-9_-]+/gi, "-");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${safeClassName}-students.xlsx"`);
+    return res.send(excelFile);
+  } catch (err) {
+    console.error("Class student Excel export error:", err);
+    return res.status(500).send("Could not export this class list.");
+  }
+});
+
 app.post("/admin/students/edit", requireAuth("admin"), async (req, res) => {
   const {
     id,
@@ -5140,7 +5233,7 @@ app.get("/student/classes", requireAuth("student"), async (req, res) => {
 
 // ====================== DEBTORS (Outstanding Balances) ======================
 async function getDebtorRows(db, filters = {}) {
-  const invoiceWhere = [];
+  const invoiceWhere = ["i.status <> 'CANCELLED'"];
   const invoiceParams = [];
   const studentWhere = ["s.status = 'active'"];
   const studentParams = [];
@@ -5178,6 +5271,11 @@ async function getDebtorRows(db, filters = {}) {
       debt.total_invoiced,
       debt.total_paid,
       debt.balance,
+      debt.current_amount,
+      debt.days_1_30,
+      debt.days_31_60,
+      debt.days_61_90,
+      debt.days_over_90,
       COALESCE(sp.sponsor_type, '') AS sponsor_type,
       COALESCE(sp.approved_amount, 0) AS approved_amount,
       COALESCE(sp.sponsor_paid, 0) AS sponsor_paid
@@ -5191,7 +5289,17 @@ async function getDebtorRows(db, filters = {}) {
                      ORDER BY i.year, i.term SEPARATOR ', ') AS invoice_terms,
         SUM(i.total_amount) AS total_invoiced,
         SUM(COALESCE(pay.total_paid, 0)) AS total_paid,
-        GREATEST(SUM(i.total_amount) - SUM(COALESCE(pay.total_paid, 0)), 0) AS balance
+        SUM(GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0)) AS balance,
+        SUM(CASE WHEN DATEDIFF(CURDATE(), COALESCE(i.pay_end, DATE(i.created_at))) <= 0
+                 THEN GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0) ELSE 0 END) AS current_amount,
+        SUM(CASE WHEN DATEDIFF(CURDATE(), COALESCE(i.pay_end, DATE(i.created_at))) BETWEEN 1 AND 30
+                 THEN GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0) ELSE 0 END) AS days_1_30,
+        SUM(CASE WHEN DATEDIFF(CURDATE(), COALESCE(i.pay_end, DATE(i.created_at))) BETWEEN 31 AND 60
+                 THEN GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0) ELSE 0 END) AS days_31_60,
+        SUM(CASE WHEN DATEDIFF(CURDATE(), COALESCE(i.pay_end, DATE(i.created_at))) BETWEEN 61 AND 90
+                 THEN GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0) ELSE 0 END) AS days_61_90,
+        SUM(CASE WHEN DATEDIFF(CURDATE(), COALESCE(i.pay_end, DATE(i.created_at))) > 90
+                 THEN GREATEST(i.total_amount - COALESCE(pay.total_paid, 0), 0) ELSE 0 END) AS days_over_90
       FROM invoices i
       LEFT JOIN (
         SELECT invoice_id, SUM(amount) AS total_paid
@@ -5235,7 +5343,7 @@ app.get("/admin/finance/export/debtors.xlsx", requireAuth("admin"), async (req, 
   try {
     const rows = await getDebtorRows(req.app.locals.db, req.query);
     const table = [
-      ["Student ID", "Registration No.", "Student Name", "Form / Grade", "Class", "Invoice Terms", "Total Invoiced", "Total Paid", "Outstanding Balance", "Sponsor Type", "Sponsorship Approved", "Sponsorship Paid"],
+      ["Student ID", "Registration No.", "Student Name", "Form / Grade", "Class", "Invoice Terms", "Total Invoiced", "Total Paid", "Outstanding Balance", "Current", "1-30 Days", "31-60 Days", "61-90 Days", "Over 90 Days", "Sponsor Type", "Sponsorship Approved", "Sponsorship Paid"],
       ...rows.map(row => [
         Number(row.student_id),
         row.student_reg || "",
@@ -5246,6 +5354,11 @@ app.get("/admin/finance/export/debtors.xlsx", requireAuth("admin"), async (req, 
         Number(row.total_invoiced || 0),
         Number(row.total_paid || 0),
         Number(row.balance || 0),
+        Number(row.current_amount || 0),
+        Number(row.days_1_30 || 0),
+        Number(row.days_31_60 || 0),
+        Number(row.days_61_90 || 0),
+        Number(row.days_over_90 || 0),
         row.sponsor_type || "",
         Number(row.approved_amount || 0),
         Number(row.sponsor_paid || 0)
@@ -5255,22 +5368,39 @@ app.get("/admin/finance/export/debtors.xlsx", requireAuth("admin"), async (req, 
     table.push([]);
     table.push(["Total Debtors", rows.length]);
     table.push(["Total Outstanding", "", "", "", "", "", "", "", totalOutstanding]);
+    table.push(["Aging Summary"]);
+    const agingSummary = [
+      ["Current", "current_amount"],
+      ["1-30 Days", "days_1_30"],
+      ["31-60 Days", "days_31_60"],
+      ["61-90 Days", "days_61_90"],
+      ["Over 90 Days", "days_over_90"]
+    ];
+    agingSummary.forEach(([label, key]) => {
+      const total = rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
+      table.push([label, "", "", "", "", "", "", "", "", total]);
+    });
 
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet(table);
     worksheet["!cols"] = [
       { wch: 12 }, { wch: 18 }, { wch: 28 }, { wch: 16 },
       { wch: 22 }, { wch: 30 }, { wch: 18 }, { wch: 16 },
-      { wch: 20 }, { wch: 18 }, { wch: 22 }, { wch: 20 }
+      { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
+      { wch: 18 }, { wch: 22 }, { wch: 20 }
     ];
     for (let rowIndex = 1; rowIndex <= rows.length; rowIndex += 1) {
-      for (const column of [6, 7, 8, 10, 11]) {
+      for (const column of [6, 7, 8, 9, 10, 11, 12, 13, 15, 16]) {
         const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: column });
         if (worksheet[cellAddress]) worksheet[cellAddress].z = '"$"#,##0.00';
       }
     }
     const totalCell = XLSX.utils.encode_cell({ r: rows.length + 3, c: 8 });
     if (worksheet[totalCell]) worksheet[totalCell].z = '"$"#,##0.00';
+    for (let rowIndex = rows.length + 5; rowIndex <= rows.length + 9; rowIndex += 1) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 9 })];
+      if (cell) cell.z = '"$"#,##0.00';
+    }
     XLSX.utils.book_append_sheet(workbook, worksheet, "Debtors");
 
     const excelFile = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });

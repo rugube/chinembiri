@@ -353,6 +353,7 @@
 
               <button class="apro-btn apro-btn-primary" onclick="openAddStudent()">➕ Add Student</button>
               <button class="apro-btn apro-btn-primary" onclick="openImportStudents()">📥 Import Students</button>
+              <button class="apro-btn apro-btn-primary" onclick="openBulkStudents()">🧮 Add in Spreadsheet</button>
               <a href="/admin/students/export" class="apro-btn apro-btn-sm">📤 Export CSV</a>
             </div>
 
@@ -528,6 +529,7 @@
                             onclick="viewClassStudents('<%= c.id %>', '<%= c.name %>')">
                             👨‍🎓 View Students
                           </button>
+                          <a class="apro-btn apro-btn-sm" href="/admin/classes/<%= c.id %>/export.xlsx">📤 Excel</a>
                         
                           <button
                             class="apro-btn apro-btn-sm"
@@ -926,7 +928,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>#</th><th>Student</th><th>Term</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th>
+                    <th>#</th><th>Student</th><th>Term</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Receipt Number(s)</th><th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -946,6 +948,7 @@
                         <td>$<%= Number(i.total_amount || 0).toFixed(2) %></td>
                         <td>$<%= Number(i.paid_amount || 0).toFixed(2) %></td>
                         <td class="td-strong">$<%= Number(i.balance || 0).toFixed(2) %></td>
+                        <td><%= i.receipt_numbers || '-' %></td>
         
                         <td>
                           <span class="apro-badge apro-badge-neutral"><%= i.status || 'UNPAID' %></span>
@@ -953,7 +956,7 @@
                       </tr>
                     <% }) %>
                   <% } else { %>
-                    <tr><td colspan="7" class="apro-center-muted">No invoices found.</td></tr>
+                    <tr><td colspan="8" class="apro-center-muted">No invoices found.</td></tr>
                   <% } %>
                 </tbody>
               </table>
@@ -970,7 +973,7 @@
             </div>
         
             <p class="apro-hint" style="margin-top:6px;">
-              Shows students with <b>outstanding balances</b> (invoices minus payments). Use the date filter to limit by <b>invoice created date</b>.
+              Shows outstanding invoice balances by age. Aging uses each invoice due date, or its creation date when no due date is set. Date filters limit by invoice creation date.
             </p>
         
             <div class="apro-form-grid" style="margin-top:8px;">
@@ -1003,7 +1006,14 @@
             </div>
         
             <div class="apro-hint" style="margin-top:8px;">
-              Total outstanding: <b>$<span id="debtorsTotal">0.00</span></b>
+              <div>Total outstanding: <b>$<span id="debtorsTotal">0.00</span></b></div>
+              <div class="apro-form-grid" style="margin-top:8px;">
+                <span>Current: <b>$<span id="debtorsCurrent">0.00</span></b></span>
+                <span>1–30 days: <b>$<span id="debtors1to30">0.00</span></b></span>
+                <span>31–60 days: <b>$<span id="debtors31to60">0.00</span></b></span>
+                <span>61–90 days: <b>$<span id="debtors61to90">0.00</span></b></span>
+                <span>Over 90 days: <b>$<span id="debtorsOver90">0.00</span></b></span>
+              </div>
             </div>
         
             <div class="apro-table-wrap" style="margin-top:12px;">
@@ -1016,10 +1026,15 @@
                     <th>Invoiced</th>
                     <th>Paid</th>
                     <th>Balance</th>
+                    <th>Current</th>
+                    <th>1–30</th>
+                    <th>31–60</th>
+                    <th>61–90</th>
+                    <th>Over 90</th>
                   </tr>
                 </thead>
                 <tbody id="debtorsBody">
-                  <tr><td colspan="6" class="apro-center-muted">Select a date range then click Apply Filter.</td></tr>
+                  <tr><td colspan="11" class="apro-center-muted">Select a date range then click Apply Filter.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1156,19 +1171,20 @@
               <div class="apro-table-wrap" style="margin-top:12px;">
                 <table class="data-table">
                   <thead>
-                    <tr><th>Invoice</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr>
+                    <tr><th>Invoice</th><th>Amount</th><th>Receipt No</th><th>Method</th><th>Reference</th><th>Date</th></tr>
                   </thead>
                   <tbody>
                     <% if (safeFinance?.payments?.length) { safeFinance.payments.forEach(p => { %>
                       <tr>
                         <td class="td-strong">#<%= p.invoice_id %></td>
                         <td>$<%= Number(p.amount || 0).toFixed(2) %></td>
+                        <td><%= p.receipt_number || '-' %></td>
                         <td><span class="apro-pill"><%= p.payment_method %></span></td>
                         <td><%= p.reference || "-" %></td>
                         <td><%= p.paid_at ? String(p.paid_at).slice(0,10) : "-" %></td>
                       </tr>
                     <% }) } else { %>
-                      <tr><td colspan="5" class="apro-center-muted">No payments recorded.</td></tr>
+                      <tr><td colspan="6" class="apro-center-muted">No payments recorded.</td></tr>
                     <% } %>
                   </tbody>
                 </table>
@@ -1185,10 +1201,10 @@
                 <span class="apro-chip"><%= safeFinance?.receipts?.length ?? 0 %> receipts</span>
               </div>
               <div class="apro-table-wrap">
-                <table class="data-table"><thead><tr><th>Receipt No</th><th>Student</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th><th>Action</th></tr></thead><tbody>
+                <table class="data-table"><thead><tr><th>Receipt No</th><th>Student</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th><th>Action</th></tr></thead><tbody>
                   <% if (safeFinance?.receipts?.length) { safeFinance.receipts.forEach(r => { %>
-                    <tr><td class="td-strong"><%= r.receipt_number %></td><td><%= r.unique_id %> — <%= r.first_name %> <%= r.last_name %></td><td>$<%= Number(r.amount || 0).toFixed(2) %></td><td><span class="apro-pill"><%= r.payment_method || '-' %></span></td><td><%= r.reference || '-' %></td><td><%= r.receipt_date ? String(r.receipt_date).slice(0,10) : '-' %></td><td><a class="apro-btn apro-btn-sm apro-btn-primary" target="_blank" href="/admin/finance/receipts/<%= r.id %>/print">🖨 Print</a></td></tr>
-                  <% }) } else { %><tr><td colspan="7" class="apro-center-muted">No receipts generated yet. Receipts are created automatically when a payment is recorded.</td></tr><% } %>
+                    <tr><td class="td-strong"><%= r.receipt_number %></td><td><%= r.unique_id %> — <%= r.first_name %> <%= r.last_name %></td><td><%= r.invoice_id ? '#' + r.invoice_id : '-' %></td><td>$<%= Number(r.amount || 0).toFixed(2) %></td><td><span class="apro-pill"><%= r.payment_method || '-' %></span></td><td><%= r.reference || '-' %></td><td><%= r.receipt_date ? String(r.receipt_date).slice(0,10) : '-' %></td><td><a class="apro-btn apro-btn-sm apro-btn-primary" target="_blank" href="/admin/finance/receipts/<%= r.id %>/print">🖨 Print</a></td></tr>
+                  <% }) } else { %><tr><td colspan="8" class="apro-center-muted">No receipts generated yet. Receipts are created automatically when a payment is recorded.</td></tr><% } %>
                 </tbody></table>
               </div>
             </div>
@@ -1794,6 +1810,25 @@
     <div class="modal-actions">
       <button type="button" onclick="closeStudentExistsModal()">OK</button>
       <button type="button" onclick="closeStudentExistsModal(); openAddStudent();">Review Entry</button>
+    </div>
+  </div>
+</div>
+
+<div id="bulkStudentsModal" class="modal">
+  <div class="modal-box" style="width:96%;max-width:1200px;">
+    <h3>🧮 Add Students in Spreadsheet</h3>
+    <p style="font-size:13px;color:#666;">Fill rows directly or paste cells copied from Excel. First name, last name, grade/form, date of birth and national ID are required. Maximum 200 students per save.</p>
+    <div class="apro-table-wrap">
+      <table class="data-table" id="bulkStudentsGrid">
+        <thead><tr><th>First Name*</th><th>Last Name*</th><th>Email</th><th>Phone</th><th>Grade / Form*</th><th>Date of Birth*</th><th>Birth / National ID*</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="bulkStudentsMessage" class="apro-hint" aria-live="polite"></p>
+    <div class="modal-actions">
+      <button type="button" onclick="addBulkStudentRow()">➕ Add Row</button>
+      <button type="button" class="apro-btn-primary" onclick="saveBulkStudents()">💾 Save Students</button>
+      <button type="button" onclick="closeBulkStudents()">Close</button>
     </div>
   </div>
 </div>
@@ -2633,7 +2668,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Your existing JS -->
-<script src="/script.js?v=5"></script>
+<script src="/script.js?v=6"></script>
 
 <script>
   // -----------------------

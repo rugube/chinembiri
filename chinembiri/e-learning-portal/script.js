@@ -125,6 +125,99 @@ function closeAddStudent() {
     if (modal) modal.style.display = "none";
 }
 
+function openBulkStudents() {
+  const modal = document.getElementById("bulkStudentsModal");
+  const body = document.querySelector("#bulkStudentsGrid tbody");
+  if (!modal || !body) return;
+  body.innerHTML = "";
+  for (let i = 0; i < 5; i += 1) addBulkStudentRow();
+  const message = document.getElementById("bulkStudentsMessage");
+  if (message) message.textContent = "";
+  modal.style.display = "flex";
+}
+
+function closeBulkStudents() {
+  const modal = document.getElementById("bulkStudentsModal");
+  if (modal) modal.style.display = "none";
+}
+
+function addBulkStudentRow(values = []) {
+  const body = document.querySelector("#bulkStudentsGrid tbody");
+  if (!body) return;
+  const row = body.insertRow();
+  const types = ["text", "text", "email", "text", "text", "text", "text"];
+  types.forEach((type, index) => {
+    const input = document.createElement("input");
+    input.type = type;
+    input.value = values[index] || "";
+    if (index === 5) input.placeholder = "YYYY-MM-DD";
+    input.setAttribute("aria-label", `Student field ${index + 1}`);
+    input.style.minWidth = index === 2 ? "180px" : "120px";
+    const cell = row.insertCell();
+    cell.appendChild(input);
+    input.addEventListener("paste", event => {
+      const pasted = event.clipboardData?.getData("text");
+      if (!pasted || !/[\t\n]/.test(pasted)) return;
+      event.preventDefault();
+      const startRow = input.closest("tr").rowIndex - 1;
+      const startCol = input.closest("td").cellIndex;
+      pasted.replace(/\r/g, "").split("\n").filter(line => line.length).forEach((line, rowOffset) => {
+        const targetRowIndex = startRow + rowOffset;
+        while (body.rows.length <= targetRowIndex) addBulkStudentRow();
+        line.split("\t").forEach((value, colOffset) => {
+          const target = body.rows[targetRowIndex]?.cells[startCol + colOffset]?.querySelector("input");
+          if (target) target.value = value.trim();
+        });
+      });
+    });
+    input.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      const r = input.closest("tr").rowIndex - 1;
+      const c = input.closest("td").cellIndex;
+      if (r === body.rows.length - 1) addBulkStudentRow();
+      body.rows[r + 1]?.cells[c]?.querySelector("input")?.focus();
+    });
+  });
+}
+
+async function saveBulkStudents() {
+  const body = document.querySelector("#bulkStudentsGrid tbody");
+  const message = document.getElementById("bulkStudentsMessage");
+  if (!body || !message) return;
+  const normalizeDate = value => {
+    const raw = String(value || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    const match = raw.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/);
+    return match ? `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}` : raw;
+  };
+  const students = Array.from(body.rows).map(row => {
+    const values = Array.from(row.querySelectorAll("input")).map(input => input.value.trim());
+    return { first_name: values[0], last_name: values[1], email: values[2], phone: values[3], form_level: values[4], date_of_birth: normalizeDate(values[5]), birth_id_number: values[6] };
+  }).filter(student => Object.values(student).some(Boolean));
+  if (!students.length) {
+    message.textContent = "Enter or paste student details before saving.";
+    return;
+  }
+  message.textContent = "Saving student records…";
+  try {
+    const response = await fetch("/admin/students/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ students })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not save students.");
+    const skipped = result.skipped || [];
+    const details = skipped.slice(0, 8).map(row => `Row ${row.row}: ${row.reason}`).join(" ");
+    message.textContent = `${result.added} student(s) added. ${skipped.length} skipped.${details ? ` ${details}` : ""}${skipped.length > 8 ? ` Plus ${skipped.length - 8} more skipped row(s).` : ""}`;
+    if (result.added) setTimeout(() => window.location.assign("/admin#students"), 1400);
+  } catch (error) {
+    message.textContent = error.message || "Could not save student records.";
+  }
+}
+
 function showStudentExistsModalFromRedirect() {
     const params = new URLSearchParams(window.location.search);
 
@@ -1253,6 +1346,13 @@ async function loadDebtors(autostart = false) {
   const body = document.getElementById('debtorsBody');
   const countEl = document.getElementById('debtorsCount');
   const totalEl = document.getElementById('debtorsTotal');
+  const agingEls = {
+    current_amount: document.getElementById('debtorsCurrent'),
+    days_1_30: document.getElementById('debtors1to30'),
+    days_31_60: document.getElementById('debtors31to60'),
+    days_61_90: document.getElementById('debtors61to90'),
+    days_over_90: document.getElementById('debtorsOver90')
+  };
 
   const fromEl = document.getElementById('debtorsFrom');
   const toEl = document.getElementById('debtorsTo');
@@ -1273,7 +1373,7 @@ async function loadDebtors(autostart = false) {
 
   body.innerHTML = `
     <tr>
-      <td colspan="6" class="apro-center-muted">
+      <td colspan="11" class="apro-center-muted">
         Loading debtors...
       </td>
     </tr>
@@ -1328,11 +1428,15 @@ async function loadDebtors(autostart = false) {
 
     countEl.textContent = rows.length;
     totalEl.textContent = totalOutstanding.toFixed(2);
+    Object.entries(agingEls).forEach(([key, element]) => {
+      const total = rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
+      if (element) element.textContent = total.toFixed(2);
+    });
 
     if (!rows.length) {
       body.innerHTML = `
         <tr>
-          <td colspan="6" class="apro-center-muted">
+          <td colspan="11" class="apro-center-muted">
             No debtors found.
           </td>
         </tr>
@@ -1372,6 +1476,11 @@ async function loadDebtors(autostart = false) {
             <td class="td-strong text-danger">
               $${Number(r.balance || 0).toFixed(2)}
             </td>
+            <td>$${Number(r.current_amount || 0).toFixed(2)}</td>
+            <td>$${Number(r.days_1_30 || 0).toFixed(2)}</td>
+            <td>$${Number(r.days_31_60 || 0).toFixed(2)}</td>
+            <td>$${Number(r.days_61_90 || 0).toFixed(2)}</td>
+            <td>$${Number(r.days_over_90 || 0).toFixed(2)}</td>
           </tr>
         `;
       }).join('');
@@ -1384,7 +1493,7 @@ async function loadDebtors(autostart = false) {
 
     body.innerHTML = `
       <tr>
-        <td colspan="6" class="apro-center-muted">
+        <td colspan="11" class="apro-center-muted">
           Error loading debtors.
         </td>
       </tr>
@@ -1392,6 +1501,7 @@ async function loadDebtors(autostart = false) {
 
     countEl.textContent = '0';
     totalEl.textContent = '0.00';
+    Object.values(agingEls).forEach(element => { if (element) element.textContent = '0.00'; });
   }
 }
 function clearDebtorsFilter() {
