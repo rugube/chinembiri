@@ -1171,20 +1171,19 @@
               <div class="apro-table-wrap" style="margin-top:12px;">
                 <table class="data-table">
                   <thead>
-                    <tr><th>Invoice</th><th>Amount</th><th>Receipt No</th><th>Method</th><th>Reference</th><th>Date</th></tr>
+                    <tr><th>Invoice</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr>
                   </thead>
                   <tbody>
                     <% if (safeFinance?.payments?.length) { safeFinance.payments.forEach(p => { %>
                       <tr>
                         <td class="td-strong">#<%= p.invoice_id %></td>
                         <td>$<%= Number(p.amount || 0).toFixed(2) %></td>
-                        <td><%= p.receipt_number || '-' %></td>
                         <td><span class="apro-pill"><%= p.payment_method %></span></td>
                         <td><%= p.reference || "-" %></td>
                         <td><%= p.paid_at ? String(p.paid_at).slice(0,10) : "-" %></td>
                       </tr>
                     <% }) } else { %>
-                      <tr><td colspan="6" class="apro-center-muted">No payments recorded.</td></tr>
+                      <tr><td colspan="5" class="apro-center-muted">No payments recorded.</td></tr>
                     <% } %>
                   </tbody>
                 </table>

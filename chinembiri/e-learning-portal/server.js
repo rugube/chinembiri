@@ -1104,9 +1104,8 @@ app.get("/admin", requireAuth("admin"), async (req, res) => {
       [employees]
     ] = await Promise.all([
       db.query(`
-        SELECT ip.*, r.receipt_number
+        SELECT ip.*
         FROM invoice_payments ip
-        LEFT JOIN receipts r ON r.payment_id = ip.id
         ORDER BY ip.paid_at DESC, ip.id DESC
       `),
       db.query(`
@@ -4712,9 +4711,9 @@ app.post("/admin/finance/payments", requireAuth("admin"), async (req, res) => {
 
     await conn.query(
       `INSERT INTO receipts
-       (receipt_number, student_id, invoice_id, payment_id, amount, payment_method, reference, received_by, receipt_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [receiptNumber, invoice.student_id, invoice_id, paymentId, amount, payment_method, reference, userId]
+       (receipt_number, student_id, invoice_id, amount, payment_method, reference, received_by, receipt_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [receiptNumber, invoice.student_id, invoice_id, amount, payment_method, reference, userId]
     );
 
     const [[paidTotals]] = await conn.query(
