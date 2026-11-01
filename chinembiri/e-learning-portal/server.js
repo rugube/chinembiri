@@ -228,6 +228,36 @@ function normalizeBirthId(value) {
     return String(value || "").trim().toUpperCase();
 }
 
+function normalizeCsvDate(value) {
+    const input = String(value || "").trim();
+    if (!input) return null;
+
+    const isoMatch = input.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s|T|$)/);
+    const localMatch = input.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+    let year;
+    let month;
+    let day;
+
+    if (isoMatch) {
+        [, year, month, day] = isoMatch;
+    } else if (localMatch) {
+        [, day, month, year] = localMatch;
+        if (year.length === 2) year = Number(year) < 70 ? `20${year}` : `19${year}`;
+    } else {
+        return null;
+    }
+
+    year = Number(year);
+    month = Number(month);
+    day = Number(day);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+        return null;
+    }
+
+    return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 function normalizeName(value) {
     return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
 }
@@ -2165,6 +2195,7 @@ app.post(
         .pipe(csv({
           mapHeaders: ({ header }) =>
             header
+              .replace(/^\uFEFF/, "")
               .trim()
               .toLowerCase()
         }))
@@ -2253,30 +2284,28 @@ app.post(
               ""
             );
 
-            if (!birthId || seenBirthIds.has(birthId)) {
+            if (birthId && seenBirthIds.has(birthId)) {
               skipped++;
               continue;
             }
 
-            const [[existingBirthId]] = await db.query(
-              "SELECT id FROM students WHERE birth_id_number=? LIMIT 1",
-              [birthId]
-            );
+            if (birthId) {
+              const [[existingBirthId]] = await db.query(
+                "SELECT id FROM students WHERE birth_id_number=? LIMIT 1",
+                [birthId]
+              );
 
-            if (existingBirthId) {
-              skipped++;
-              continue;
+              if (existingBirthId) {
+                skipped++;
+                continue;
+              }
+              seenBirthIds.add(birthId);
             }
 
-            seenBirthIds.add(birthId);
-
-            const status =
-              (
-                r["status"] ||
-                "active"
-              )
-              .trim()
-              .toLowerCase();
+            const requestedStatus = String(r["status"] || "active").trim().toLowerCase();
+            const status = ["active", "inactive", "graduated"].includes(requestedStatus)
+              ? requestedStatus
+              : "active";
 
             // =========================
             // REG NUMBER
@@ -2375,7 +2404,7 @@ app.post(
                   formLevel,
                   email,
                   phone,
-                  dob || null,
+                  normalizeCsvDate(dob),
                   birthId || null,
                   status
                 ]
