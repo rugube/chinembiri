@@ -2962,6 +2962,21 @@ table,
     background: #f8fafc;
 }
 
+#viewStudentsModal .class-student-row {
+    cursor: pointer;
+}
+
+#viewStudentsModal .class-student-row:hover,
+#viewStudentsModal .class-student-row:focus {
+    background: #eff6ff;
+    outline: 2px solid #93c5fd;
+    outline-offset: -2px;
+}
+
+#studentDetailsModal {
+    z-index: 1101;
+}
+
 /* =========================
    IMPORT TEACHERS MODAL
 ========================= */

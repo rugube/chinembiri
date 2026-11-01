@@ -1918,7 +1918,7 @@ async function viewClassStudents(classId, className) {
 
       tbody.innerHTML += `
 
-        <tr>
+        <tr class="class-student-row" data-student-id="${Number(student.id)}" tabindex="0" title="Click to view student information">
 
           <td>
             <strong>${index + 1}</strong>
@@ -1972,6 +1972,19 @@ async function viewClassStudents(classId, className) {
       `;
 
     });
+
+    tbody.onclick = event => {
+      if (event.target.closest("button")) return;
+      const row = event.target.closest("tr[data-student-id]");
+      if (row) openStudentDetails(row.dataset.studentId);
+    };
+    tbody.onkeydown = event => {
+      if (!["Enter", " "].includes(event.key)) return;
+      const row = event.target.closest("tr[data-student-id]");
+      if (!row || event.target.closest("button")) return;
+      event.preventDefault();
+      openStudentDetails(row.dataset.studentId);
+    };
 
   } catch (err) {
 
