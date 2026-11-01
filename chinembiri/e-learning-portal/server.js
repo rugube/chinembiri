@@ -172,6 +172,7 @@ async function ensureRegistrationUniqueness(connection) {
         ["user_id"],
         "user_id IS NOT NULL"
     );
+
 }
 
 
@@ -5232,7 +5233,7 @@ app.get("/student/classes", requireAuth("student"), async (req, res) => {
 
 // ====================== DEBTORS (Outstanding Balances) ======================
 async function getDebtorRows(db, filters = {}) {
-  const invoiceWhere = ["i.status <> 'CANCELLED'"];
+  const invoiceWhere = [];
   const invoiceParams = [];
   const studentWhere = ["s.status = 'active'"];
   const studentParams = [];
